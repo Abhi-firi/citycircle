@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
 
@@ -22,6 +23,7 @@ export default function SignupPage() {
     setError(null);
     if (fullName.trim().length < 1) return setError("Enter your full name.");
     if (password.length < 8) return setError("Password must be at least 8 characters.");
+    if (!agreed) return setError("Please agree to the Terms and Privacy Policy to continue.");
 
     setBusy(true);
     try {
@@ -78,6 +80,25 @@ export default function SignupPage() {
         <Field label="Password" htmlFor="password" hint="At least 8 characters.">
           <input id="password" type="password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
         </Field>
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="mt-1"
+          />
+          <span>
+            I am 18 or older and agree to the{" "}
+            <Link href="/terms/" target="_blank" rel="noopener" className="font-medium text-primary underline">
+              Terms of Use
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy/" target="_blank" rel="noopener" className="font-medium text-primary underline">
+              Privacy Policy
+            </Link>
+            .
+          </span>
+        </label>
         {error && (
           <p role="alert" className="text-sm text-red-600 dark:text-red-400">
             {error}
