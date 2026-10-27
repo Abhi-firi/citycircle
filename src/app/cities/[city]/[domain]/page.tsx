@@ -55,7 +55,7 @@ export default async function CommunityPage({ params }: Props) {
         </h2>
         <p className="text-sm text-muted">
           This community opens once {community.unlockTarget} people in {city.name} have joined the
-          waitlist. Sign-ups are not open yet. Check back soon.
+          waitlist. Joining the waitlist is coming soon. You can create your profile now.
         </p>
       </section>
     </div>
