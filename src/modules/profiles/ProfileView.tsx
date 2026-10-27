@@ -1,7 +1,18 @@
+import Link from "next/link";
 import { communityRepository as repo } from "@/modules/communities/repository";
 import type { ProfileInput } from "./validation";
 
-export function ProfileView({ profile, onEdit }: { profile: ProfileInput; onEdit: () => void }) {
+export type JoinedCommunity = { key: string; name: string; href: string };
+
+export function ProfileView({
+  profile,
+  communities,
+  onEdit,
+}: {
+  profile: ProfileInput;
+  communities: JoinedCommunity[];
+  onEdit: () => void;
+}) {
   const city = repo.getCity(profile.citySlug);
   const domains = profile.domainSlugs
     .map((slug) => repo.getDomain(slug))
@@ -38,6 +49,29 @@ export function ProfileView({ profile, onEdit }: { profile: ProfileInput; onEdit
           </ul>
         </div>
       )}
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">Your communities</h3>
+        {communities.length === 0 ? (
+          <p className="text-sm text-muted">
+            You have not joined any waitlist yet.{" "}
+            <Link href="/cities/" className="font-medium text-primary underline">
+              Find your city
+            </Link>
+          </p>
+        ) : (
+          <ul className="space-y-1">
+            {communities.map((c) => (
+              <li key={c.key}>
+                <Link href={c.href} className="text-sm font-medium text-primary hover:underline">
+                  {c.name}
+                </Link>
+                <span className="ml-2 text-xs text-muted">Waitlist</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <button
         type="button"
