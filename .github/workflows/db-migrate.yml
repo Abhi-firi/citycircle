@@ -2,9 +2,10 @@ name: Database migrations
 
 # Applies SQL files in supabase/migrations to the Supabase project.
 # Runs on GitHub's servers, so no one has to paste SQL by hand.
-# Needs two repository secrets (Settings > Secrets and variables > Actions):
-#   SUPABASE_ACCESS_TOKEN  (Supabase dashboard > Account > Access Tokens)
-#   SUPABASE_DB_PASSWORD   (Supabase dashboard > Project Settings > Database)
+# Needs one repository secret (Settings > Secrets and variables > Actions):
+#   SUPABASE_DB_URL  the Session pooler connection string from the Supabase
+#                    dashboard (Connect > Session pooler), with the real
+#                    database password filled in.
 
 on:
   push:
@@ -25,25 +26,25 @@ jobs:
   migrate:
     runs-on: ubuntu-latest
     env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      PROJECT_REF: vrtwecmokoxmykxproei
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check required secrets
+      - name: Check required secret
         run: |
-          missing=0
-          [ -n "$SUPABASE_ACCESS_TOKEN" ] || { echo "::error::Secret SUPABASE_ACCESS_TOKEN is missing"; missing=1; }
-          [ -n "$SUPABASE_DB_PASSWORD" ] || { echo "::error::Secret SUPABASE_DB_PASSWORD is missing"; missing=1; }
-          exit $missing
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Secret SUPABASE_DB_URL is missing"
+            exit 1
+          fi
+          case "$SUPABASE_DB_URL" in
+            *"[YOUR-PASSWORD]"*|*"[PASSWORD]"*) echo "::error::SUPABASE_DB_URL still contains the password placeholder"; exit 1 ;;
+            postgres://*|postgresql://*) ;;
+            *) echo "::error::SUPABASE_DB_URL must start with postgresql://"; exit 1 ;;
+          esac
 
       - uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: Link project
-        run: supabase link --project-ref "$PROJECT_REF"
-
       - name: Apply migrations
-        run: supabase db push
+        run: supabase db push --db-url "$SUPABASE_DB_URL"
