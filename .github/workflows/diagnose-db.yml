@@ -1,7 +1,8 @@
 name: Diagnose profile save (temporary)
 
-# Temporary. Reproduces the profile save inside a rolled-back transaction and
-# reports grants, policies and the exact database error. Changes no data.
+# Temporary. Creates a throwaway confirmed test user, signs in through the real
+# Supabase Auth API and repeats the profile save through the real REST API,
+# exactly like the browser does. The test user is deleted at the end.
 
 on:
   pull_request:
@@ -16,44 +17,50 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      URL: https://vrtwecmokoxmykxproei.supabase.co
+      KEY: sb_publishable_0RJCiYMgABUVAqbFl9d7zA_ngAtDg2T
     steps:
-      - name: Run diagnostics
+      - name: Reproduce save through the API
         run: |
           set +e
-          cat > /tmp/diag.sql <<'SQL'
-          \pset tuples_only on
-          \pset format unaligned
-          \echo == grants
-          select table_name || ' ' || grantee || ' ' || string_agg(privilege_type, ',' order by privilege_type) from information_schema.role_table_grants where table_schema='public' and table_name like 'profile%' and grantee in ('anon','authenticated') group by table_name, grantee order by 1;
-          \echo == policies
-          select tablename || ' / ' || policyname || ' / ' || cmd || ' / ' || roles::text from pg_policies where schemaname='public' order by 1;
-          \echo == profiles columns
-          select string_agg(column_name, ',' order by ordinal_position) from information_schema.columns where table_schema='public' and table_name='profiles';
-          \echo == auth users and profiles
-          select (select count(*) from auth.users) || ' users, ' || (select count(*) from public.profiles) || ' profiles';
-          select id as uid from auth.users order by created_at desc limit 1 \gset
-          \echo == simulate profiles upsert
-          begin;
-          set local role authenticated;
-          select set_config('request.jwt.claims', json_build_object('sub', :'uid', 'role', 'authenticated')::text, true);
-          insert into public.profiles (id, full_name, headline, about, city_slug, domain_slugs, current_role_title, current_company, skills, linkedin_url, website_url) values (:'uid', 'Test', 'h', 'a', 'delhi', '{vc}', 'r', 'c', '{a,b}', 'https://x.com', 'https://y.com') on conflict (id) do update set full_name = excluded.full_name, headline = excluded.headline, about = excluded.about, city_slug = excluded.city_slug, domain_slugs = excluded.domain_slugs, current_role_title = excluded.current_role_title, current_company = excluded.current_company, skills = excluded.skills, linkedin_url = excluded.linkedin_url, website_url = excluded.website_url;
-          rollback;
-          \echo == simulate details upsert
-          begin;
-          set local role authenticated;
-          select set_config('request.jwt.claims', json_build_object('sub', :'uid', 'role', 'authenticated')::text, true);
-          insert into public.profile_details (user_id, experience_years) values (:'uid', 5) on conflict (user_id) do update set experience_years = excluded.experience_years;
-          rollback;
-          \echo == simulate recruiter upsert
-          begin;
-          set local role authenticated;
-          select set_config('request.jwt.claims', json_build_object('sub', :'uid', 'role', 'authenticated')::text, true);
-          insert into public.profile_recruiter (user_id, open_to_work, notice_period_days, expected_ctc_min_lpa, expected_ctc_max_lpa) values (:'uid', true, 30, 20, 25) on conflict (user_id) do update set open_to_work = excluded.open_to_work, notice_period_days = excluded.notice_period_days, expected_ctc_min_lpa = excluded.expected_ctc_min_lpa, expected_ctc_max_lpa = excluded.expected_ctc_max_lpa;
-          rollback;
-          \echo == done
+          EMAIL="citycircle-diag-${GITHUB_RUN_ID}@example.invalid"
+          PASS="Diag-$(openssl rand -hex 8)"
+          echo "$EMAIL" > /tmp/email.txt
+          OUT=/tmp/out.txt; : > $OUT
+
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -q <<SQL >> $OUT 2>&1
+          insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+            confirmation_token, recovery_token, email_change_token_new, email_change)
+          values ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+            '$EMAIL', extensions.crypt('$PASS', extensions.gen_salt('bf')), now(),
+            '{"provider":"email","providers":["email"]}', '{"full_name":"Diag"}', now(), now(), '', '', '', '');
           SQL
-          sed -i 's/^          //' /tmp/diag.sql
-          psql "$SUPABASE_DB_URL" -f /tmp/diag.sql > /tmp/out.txt 2>&1
-          cat /tmp/out.txt
-          msg=$(tr '\n' '|' < /tmp/out.txt | head -c 3800)
-          echo "::error title=DB diagnostics::${msg}"
+          echo "create user exit: $?" >> $OUT
+
+          LOGIN=$(curl -sS -w "\n%{http_code}" -X POST "$URL/auth/v1/token?grant_type=password" \
+            -H "apikey: $KEY" -H "Content-Type: application/json" \
+            -d "{\"email\":\"$EMAIL\",\"password\":\"$PASS\"}")
+          echo "login http: $(echo "$LOGIN" | tail -1)" >> $OUT
+          TOKEN=$(echo "$LOGIN" | head -n -1 | jq -r '.access_token // empty')
+          UID_=$(echo "$LOGIN" | head -n -1 | jq -r '.user.id // empty')
+          if [ -z "$TOKEN" ]; then echo "login body: $(echo "$LOGIN" | head -n -1 | head -c 300)" >> $OUT; fi
+          echo "token present: $([ -n "$TOKEN" ] && echo yes || echo no)" >> $OUT
+
+          call() { # name method path body prefer
+            R=$(curl -sS -w "\n%{http_code}" -X "$2" "$URL/rest/v1/$3" \
+              -H "apikey: $KEY" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+              ${5:+-H "Prefer: $5"} ${4:+-d "$4"})
+            echo "$1 -> http $(echo "$R" | tail -1) $(echo "$R" | head -n -1 | head -c 300)" >> $OUT
+          }
+          call "read profile" GET "profiles?select=id,full_name&id=eq.$UID_"
+          call "upsert profiles" POST "profiles" "{\"id\":\"$UID_\",\"full_name\":\"Test\",\"headline\":\"h\",\"about\":null,\"city_slug\":\"delhi\",\"domain_slugs\":[\"vc\"],\"current_role_title\":\"r\",\"current_company\":\"c\",\"skills\":[\"a\",\"b\"],\"linkedin_url\":\"https://x.com\",\"website_url\":\"https://y.com\"}" "resolution=merge-duplicates,return=minimal"
+          call "upsert details" POST "profile_details" "{\"user_id\":\"$UID_\",\"experience_years\":5}" "resolution=merge-duplicates,return=minimal"
+          call "upsert recruiter" POST "profile_recruiter" "{\"user_id\":\"$UID_\",\"open_to_work\":true,\"notice_period_days\":30,\"expected_ctc_min_lpa\":20,\"expected_ctc_max_lpa\":25}" "resolution=merge-duplicates,return=minimal"
+          call "upsert recruiter nulls" POST "profile_recruiter" "{\"user_id\":\"$UID_\",\"open_to_work\":false,\"notice_period_days\":null,\"expected_ctc_min_lpa\":null,\"expected_ctc_max_lpa\":null}" "resolution=merge-duplicates,return=minimal"
+
+          psql "$SUPABASE_DB_URL" -q -c "delete from auth.users where email = '$EMAIL';" >> $OUT 2>&1
+          echo "cleanup exit: $?" >> $OUT
+          cat $OUT
+          msg=$(tr '\n' '|' < $OUT | head -c 3800)
+          echo "::error title=API diagnostics::${msg}"
