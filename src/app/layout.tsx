@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { AuthNav } from "@/modules/auth/AuthNav";
 import { AuthProvider } from "@/modules/auth/AuthProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "City Circle: find your city's professional communities",
-    template: "%s | City Circle",
+    default: "CityCircle: find your city's professional communities",
+    template: "%s | CityCircle",
   },
   description:
     "Curated city-wise communities for investors, founders, coders, recruiters, creators and builders across India's metro cities.",
@@ -24,14 +25,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <header className="border-b border-line">
+        <header className="border-b border-line bg-surface">
           <nav
             aria-label="Main"
             className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4"
           >
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-              <span aria-hidden className="inline-block h-3 w-3 rounded-full bg-accent" />
-              City Circle
+            <Link href="/" aria-label="CityCircle home">
+              <Logo />
             </Link>
             <div className="flex items-center gap-5">
               <Link href="/cities/" className="text-sm text-muted hover:text-fg">
