@@ -45,3 +45,11 @@ Goal: a LinkedIn-style professional profile that also powers the later recruitme
 1. Is "Current CTC" really not needed? (Recommended: skip it, expected CTC is enough.)
 2. Should "Total experience" be public or members-only? (Recommended: members-only.)
 3. Verified badge for investors and builders: how will we verify (LinkedIn link, company email, manual check)?
+
+## Rollout stages (decided 27 Oct 2026)
+- **Stage 1 (live in Phase 2):** basic details only: full name, city, domains, current role,
+  company, headline. The profile page shows these, with an Edit option.
+- **Later, "Complete your profile" (about 4 steps):** job details live in their own step:
+  experience, skills, open to work, notice period, expected CTC. All optional, private by default.
+- **Removed:** LinkedIn and website links are not collected at all.
+- The `profile_details` and `profile_recruiter` tables stay in the database for the later steps.

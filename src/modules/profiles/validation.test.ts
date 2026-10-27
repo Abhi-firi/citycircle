@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSkills, validateProfile, type ProfileInput } from "./validation";
+import { isProfileComplete, validateProfile, type ProfileInput } from "./validation";
 
 const cities = ["delhi", "bangalore"];
 const domains = ["vc", "coders"];
@@ -7,30 +7,20 @@ const domains = ["vc", "coders"];
 const valid: ProfileInput = {
   fullName: "Asha Rao",
   headline: "Product Manager",
-  about: "",
   citySlug: "bangalore",
   domainSlugs: ["coders"],
   roleTitle: "PM",
   company: "Acme",
-  experienceYears: "5",
-  skillsText: "SQL, Figma",
-  linkedinUrl: "https://linkedin.com/in/asha",
-  websiteUrl: "",
-  openToWork: false,
-  noticePeriodDays: "",
-  ctcMin: "",
-  ctcMax: "",
 };
-
-describe("parseSkills", () => {
-  it("splits, trims, removes empties and duplicates", () => {
-    expect(parseSkills(" SQL, sql ,, Figma ,")).toEqual(["SQL", "Figma"]);
-  });
-});
 
 describe("validateProfile", () => {
   it("accepts a valid profile", () => {
     expect(validateProfile(valid, cities, domains)).toEqual({});
+  });
+
+  it("accepts a profile with only the required fields", () => {
+    const minimal = { ...valid, headline: "", roleTitle: "", company: "" };
+    expect(validateProfile(minimal, cities, domains)).toEqual({});
   });
 
   it("requires name, city and at least one domain", () => {
@@ -46,26 +36,21 @@ describe("validateProfile", () => {
     expect(errors.domainSlugs).toBeDefined();
   });
 
-  it("limits experience to whole years from 0 to 60", () => {
-    expect(validateProfile({ ...valid, experienceYears: "61" }, cities, domains).experienceYears).toBeDefined();
-    expect(validateProfile({ ...valid, experienceYears: "2.5" }, cities, domains).experienceYears).toBeDefined();
-    expect(validateProfile({ ...valid, experienceYears: "0" }, cities, domains).experienceYears).toBeUndefined();
+  it("enforces length limits", () => {
+    expect(validateProfile({ ...valid, fullName: "a".repeat(101) }, cities, domains).fullName).toBeDefined();
+    expect(validateProfile({ ...valid, headline: "a".repeat(161) }, cities, domains).headline).toBeDefined();
+    expect(validateProfile({ ...valid, roleTitle: "a".repeat(101) }, cities, domains).roleTitle).toBeDefined();
+    expect(validateProfile({ ...valid, company: "a".repeat(101) }, cities, domains).company).toBeDefined();
+  });
+});
+
+describe("isProfileComplete", () => {
+  it("is true with name, city and a domain", () => {
+    expect(isProfileComplete(valid)).toBe(true);
   });
 
-  it("requires https links", () => {
-    expect(validateProfile({ ...valid, websiteUrl: "http://x.com" }, cities, domains).websiteUrl).toBeDefined();
-    expect(validateProfile({ ...valid, linkedinUrl: "javascript:alert(1)" }, cities, domains).linkedinUrl).toBeDefined();
-  });
-
-  it("limits skills to 30", () => {
-    const many = Array.from({ length: 31 }, (_, i) => `s${i}`).join(",");
-    expect(validateProfile({ ...valid, skillsText: many }, cities, domains).skillsText).toBeDefined();
-  });
-
-  it("checks notice period and CTC range", () => {
-    expect(validateProfile({ ...valid, noticePeriodDays: "45" }, cities, domains).noticePeriodDays).toBeDefined();
-    expect(validateProfile({ ...valid, noticePeriodDays: "30" }, cities, domains).noticePeriodDays).toBeUndefined();
-    expect(validateProfile({ ...valid, ctcMin: "25", ctcMax: "20" }, cities, domains).ctcMax).toBeDefined();
-    expect(validateProfile({ ...valid, ctcMin: "20", ctcMax: "25" }, cities, domains)).toEqual({});
+  it("is false when city or domains are missing", () => {
+    expect(isProfileComplete({ ...valid, citySlug: "" })).toBe(false);
+    expect(isProfileComplete({ ...valid, domainSlugs: [] })).toBe(false);
   });
 });

@@ -6,44 +6,40 @@ import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase/client";
 import { useAuth } from "@/modules/auth/AuthProvider";
 import { ProfileForm } from "@/modules/profiles/ProfileForm";
-import type { ProfileInput } from "@/modules/profiles/validation";
+import { ProfileView } from "@/modules/profiles/ProfileView";
+import { isProfileComplete, type ProfileInput } from "@/modules/profiles/validation";
 
 function ProfileLoader({ user }: { user: User }) {
-  const [initial, setInitial] = useState<ProfileInput | null>(null);
+  const [profile, setProfile] = useState<ProfileInput | null>(null);
+  const [editing, setEditing] = useState(false);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const supabase = getSupabase();
-        const [p, d, r] = await Promise.all([
-          supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-          supabase.from("profile_details").select("*").eq("user_id", user.id).maybeSingle(),
-          supabase.from("profile_recruiter").select("*").eq("user_id", user.id).maybeSingle(),
-        ]);
-        if (p.error || d.error || r.error) throw new Error("load failed");
+        const { data, error } = await getSupabase()
+          .from("profiles")
+          .select("full_name, headline, city_slug, domain_slugs, current_role_title, current_company")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (error) throw error;
         if (!active) return;
 
         const metaName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : "";
-        setInitial({
-          fullName: p.data?.full_name ?? metaName,
-          headline: p.data?.headline ?? "",
-          about: p.data?.about ?? "",
-          citySlug: p.data?.city_slug ?? "",
-          domainSlugs: p.data?.domain_slugs ?? [],
-          roleTitle: p.data?.current_role_title ?? "",
-          company: p.data?.current_company ?? "",
-          experienceYears: d.data?.experience_years != null ? String(d.data.experience_years) : "",
-          skillsText: (p.data?.skills ?? []).join(", "),
-          linkedinUrl: p.data?.linkedin_url ?? "",
-          websiteUrl: p.data?.website_url ?? "",
-          openToWork: r.data?.open_to_work ?? false,
-          noticePeriodDays: r.data?.notice_period_days != null ? String(r.data.notice_period_days) : "",
-          ctcMin: r.data?.expected_ctc_min_lpa != null ? String(r.data.expected_ctc_min_lpa) : "",
-          ctcMax: r.data?.expected_ctc_max_lpa != null ? String(r.data.expected_ctc_max_lpa) : "",
-        });
-      } catch {
+        const loaded: ProfileInput = {
+          fullName: data?.full_name ?? metaName,
+          headline: data?.headline ?? "",
+          citySlug: data?.city_slug ?? "",
+          domainSlugs: data?.domain_slugs ?? [],
+          roleTitle: data?.current_role_title ?? "",
+          company: data?.current_company ?? "",
+        };
+        setProfile(loaded);
+        // New members go straight to the form; returning members see their profile.
+        setEditing(!isProfileComplete(loaded));
+      } catch (err) {
+        console.error("Profile load failed", err);
         if (active) setFailed(true);
       }
     })();
@@ -53,8 +49,31 @@ function ProfileLoader({ user }: { user: User }) {
   }, [user]);
 
   if (failed) return <p className="text-muted">Could not load your profile. Please refresh the page.</p>;
-  if (!initial) return <p className="text-muted">Loading your profile...</p>;
-  return <ProfileForm userId={user.id} initial={initial} />;
+  if (!profile) return <p className="text-muted">Loading your profile...</p>;
+
+  if (editing) {
+    const firstTime = !isProfileComplete(profile);
+    return (
+      <div className="space-y-4">
+        {firstTime && (
+          <p className="max-w-xl text-muted">
+            Tell us a little about you. It takes under a minute and you can change it any time.
+          </p>
+        )}
+        <ProfileForm
+          userId={user.id}
+          initial={profile}
+          onSaved={(saved) => {
+            setProfile(saved);
+            setEditing(false);
+          }}
+          onCancel={firstTime ? undefined : () => setEditing(false)}
+        />
+      </div>
+    );
+  }
+
+  return <ProfileView profile={profile} onEdit={() => setEditing(true)} />;
 }
 
 export default function ProfilePage() {
