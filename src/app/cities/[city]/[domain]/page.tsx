@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { communityRepository as repo } from "@/modules/communities/repository";
+import { JoinPanel } from "@/modules/memberships/JoinPanel";
 
 type Props = { params: Promise<{ city: string; domain: string }> };
 
@@ -46,18 +47,13 @@ export default async function CommunityPage({ params }: Props) {
         <h1 className="text-3xl font-semibold">{community.name}</h1>
         <p className="max-w-2xl text-muted">{domain.description}</p>
       </div>
-      <section
-        aria-labelledby="status-heading"
-        className="max-w-xl space-y-2 rounded-xl border border-line bg-surface p-5"
-      >
-        <h2 id="status-heading" className="font-semibold">
-          Opening soon
-        </h2>
-        <p className="text-sm text-muted">
-          This community opens once {community.unlockTarget} people in {city.name} have joined the
-          waitlist. Joining the waitlist is coming soon. You can create your profile now.
-        </p>
-      </section>
+      <JoinPanel
+        citySlug={city.slug}
+        domainSlug={domain.slug}
+        communityName={community.name}
+        cityName={city.name}
+        unlockTarget={community.unlockTarget}
+      />
     </div>
   );
 }

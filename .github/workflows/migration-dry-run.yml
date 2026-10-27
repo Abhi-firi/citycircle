@@ -1,0 +1,51 @@
+name: Database dry run
+
+# On pull requests that touch supabase/: applies the changed migrations and runs
+# the SQL tests inside one transaction that is ALWAYS rolled back. Nothing is
+# kept, so a broken migration or a broken security rule is caught before merge.
+# Later this should point at a separate staging database instead of production.
+
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - ".github/workflows/migration-dry-run.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply changed migrations and run SQL tests (rolled back)
+        run: |
+          set -eu
+          if [ -z "$SUPABASE_DB_URL" ]; then echo "::error::SUPABASE_DB_URL secret is missing"; exit 1; fi
+
+          files=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- 'supabase/migrations/*.sql' | sort)
+          {
+            echo "begin;"
+            for f in $files; do
+              echo "\\echo applying $f"
+              cat "$f"
+              echo
+            done
+            for t in supabase/tests/*.sql; do
+              [ -e "$t" ] || continue
+              echo "\\echo running $t"
+              cat "$t"
+              echo
+            done
+            echo "rollback;"
+          } > /tmp/dry.sql
+
+          echo "Migrations in this PR: ${files:-none}"
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f /tmp/dry.sql 2>&1 | tee /tmp/dry.log
+          grep -q "tests passed" /tmp/dry.log || { echo "::error::SQL tests did not report success"; exit 1; }
