@@ -45,7 +45,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         <footer className="mx-auto max-w-5xl border-t border-line px-4 py-8 text-sm text-muted">
-          City Circle is in early development.
+          <p>CityCircle is in early development.</p>
+          <nav aria-label="Legal" className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
+            <Link href="/terms/" className="hover:text-fg">
+              Terms
+            </Link>
+            <Link href="/privacy/" className="hover:text-fg">
+              Privacy
+            </Link>
+            <Link href="/guidelines/" className="hover:text-fg">
+              Community Guidelines
+            </Link>
+          </nav>
         </footer>
         </AuthProvider>
       </body>
