@@ -1,47 +1,55 @@
 @import "tailwindcss";
 
+/*
+ * CityCircle brand tokens (brand guidelines v1.0).
+ * Change colours here only. Do not hardcode hex values in components,
+ * and do not add new prominent brand colours without approval.
+ */
 :root {
-  --bg: #fbfaf7;
-  --surface: #ffffff;
-  --fg: #16181d;
-  --muted: #5d6470;
-  --line: #e6e3da;
-  --accent: #1f4fd8;
-  --accent-fg: #ffffff;
-  --accent-soft: #e8eefc;
-}
+  color-scheme: light;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1115;
-    --surface: #171a21;
-    --fg: #f1f2f5;
-    --muted: #a0a6b2;
-    --line: #272b35;
-    --accent: #6f95ff;
-    --accent-fg: #0b1020;
-    --accent-soft: #1b2440;
-  }
+  /* Primary brand */
+  --brand-primary: #176b63; /* buttons, active nav, links, key actions */
+  --brand-deep: #164e49; /* logo, premium sections */
+  --brand-mint: #e5f1ee; /* subtle highlights, selected items */
+  --brand-pale: #f0f7f5; /* lightly tinted cards, secondary sections */
+
+  /* Neutrals */
+  --neutral-bg: #f7f9f8; /* main background */
+  --neutral-surface: #ffffff; /* cards */
+  --neutral-text: #263331; /* primary text */
+  --neutral-muted: #687773; /* secondary text */
+  --neutral-line: #e3eae7; /* borders and dividers */
+
+  --on-primary: #ffffff;
 }
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-fg: var(--fg);
-  --color-muted: var(--muted);
-  --color-line: var(--line);
-  --color-accent: var(--accent);
-  --color-accent-fg: var(--accent-fg);
-  --color-accent-soft: var(--accent-soft);
+  --color-primary: var(--brand-primary);
+  --color-deep: var(--brand-deep);
+  --color-mint: var(--brand-mint);
+  --color-pale: var(--brand-pale);
+
+  --color-bg: var(--neutral-bg);
+  --color-surface: var(--neutral-surface);
+  --color-fg: var(--neutral-text);
+  --color-muted: var(--neutral-muted);
+  --color-line: var(--neutral-line);
+  --color-on-primary: var(--on-primary);
+
+  /* Aliases used by existing components */
+  --color-accent: var(--brand-primary);
+  --color-accent-fg: var(--on-primary);
+  --color-accent-soft: var(--brand-mint);
 }
 
 body {
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--neutral-bg);
+  color: var(--neutral-text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }

@@ -16,12 +16,20 @@ export default function HomePage() {
           builders. Free for members. Communities are created by the City Circle team, so every
           group stays relevant.
         </p>
-        <Link
-          href="/cities/"
-          className="inline-block rounded-lg bg-accent px-5 py-3 font-medium text-accent-fg hover:opacity-90"
-        >
-          Explore your city
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/signup/"
+            className="inline-block rounded-lg bg-accent px-5 py-3 font-medium text-accent-fg hover:opacity-90"
+          >
+            Create your profile
+          </Link>
+          <Link
+            href="/cities/"
+            className="inline-block rounded-lg border border-line px-5 py-3 font-medium hover:border-accent"
+          >
+            Explore your city
+          </Link>
+        </div>
       </section>
 
       <section aria-labelledby="cities-heading" className="space-y-4">
