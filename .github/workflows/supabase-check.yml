@@ -1,0 +1,36 @@
+name: Supabase connection check
+
+# Confirms the project URL and publishable key work. Both values are public by design.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://vrtwecmokoxmykxproei.supabase.co
+      SUPABASE_KEY: sb_publishable_0RJCiYMgABUVAqbFl9d7zA_ngAtDg2T
+    steps:
+      - name: Auth service reachable with this key
+        run: |
+          code=$(curl -sS -o /tmp/auth.json -w "%{http_code}" "$SUPABASE_URL/auth/v1/settings" -H "apikey: $SUPABASE_KEY")
+          echo "Auth settings: HTTP $code"
+          [ "$code" = "200" ] || { echo "::error::Supabase rejected the URL or key (HTTP $code)"; cat /tmp/auth.json; exit 1; }
+          echo "Email sign-up enabled: $(grep -o '"email":[a-z]*' /tmp/auth.json | head -1)"
+
+      - name: Database API reachable with this key
+        run: |
+          code=$(curl -sS -o /tmp/rest.json -w "%{http_code}" "$SUPABASE_URL/rest/v1/profiles?select=id&limit=1" -H "apikey: $SUPABASE_KEY")
+          echo "profiles table: HTTP $code"
+          case "$code" in
+            200) echo "profiles table exists and is readable" ;;
+            404) echo "::warning::profiles table not found yet (migration not applied)" ;;
+            *) echo "::error::Unexpected response (HTTP $code)"; cat /tmp/rest.json; exit 1 ;;
+          esac

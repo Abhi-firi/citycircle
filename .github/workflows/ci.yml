@@ -22,3 +22,6 @@ jobs:
       - run: npm run typecheck
       - run: npm run test
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://vrtwecmokoxmykxproei.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_0RJCiYMgABUVAqbFl9d7zA_ngAtDg2T
