@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { AuthNav } from "@/modules/auth/AuthNav";
 import { AuthProvider } from "@/modules/auth/AuthProvider";
+import "@fontsource-variable/inter";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,6 +13,13 @@ export const metadata: Metadata = {
   },
   description:
     "Curated city-wise communities for investors, founders, coders, recruiters, creators and builders across India's metro cities.",
+  openGraph: {
+    title: "CityCircle: find your city's professional communities",
+    description:
+      "Curated city-wise communities for investors, founders, coders, recruiters, creators and builders across India's metro cities.",
+    siteName: "CityCircle",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -25,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <header className="border-b border-line bg-surface">
+        <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur">
           <nav
             aria-label="Main"
             className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4"

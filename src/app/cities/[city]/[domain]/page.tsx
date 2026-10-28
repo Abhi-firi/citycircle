@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DomainIcon } from "@/modules/communities/DomainIcon";
 import { communityRepository as repo } from "@/modules/communities/repository";
 import { JoinPanel } from "@/modules/memberships/JoinPanel";
 
@@ -43,9 +44,14 @@ export default async function CommunityPage({ params }: Props) {
         </Link>{" "}
         / {domain.name}
       </nav>
-      <div className="space-y-3">
-        <h1 className="text-3xl font-semibold">{community.name}</h1>
-        <p className="max-w-2xl text-muted">{domain.description}</p>
+      <div className="flex items-start gap-4">
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-mint text-primary">
+          <DomainIcon slug={domain.slug} className="h-7 w-7" />
+        </span>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight">{community.name}</h1>
+          <p className="max-w-2xl text-muted">{domain.description}</p>
+        </div>
       </div>
       <JoinPanel
         citySlug={city.slug}
