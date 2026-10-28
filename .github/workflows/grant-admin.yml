@@ -1,0 +1,36 @@
+name: Grant admin
+
+# Makes one existing CityCircle user an admin. Run it by hand:
+# Actions > Grant admin > Run workflow, and type the email the user signed up with.
+# Needs the same SUPABASE_DB_URL secret as the migrations.
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Email of the user to make admin (they must have signed up already)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  grant:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      ADMIN_EMAIL: ${{ inputs.email }}
+    steps:
+      - name: Grant admin
+        run: |
+          set -eu
+          if [ -z "$SUPABASE_DB_URL" ]; then echo "::error::SUPABASE_DB_URL secret is missing"; exit 1; fi
+          out=$(printf '%s\n' "insert into public.admins (user_id) select id from auth.users where lower(email) = lower(:'email') on conflict do nothing returning user_id;" \
+            | psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -v email="$ADMIN_EMAIL" -tA -f -)
+          if [ -n "$out" ]; then
+            echo "::notice::Admin granted"
+          else
+            exists=$(printf '%s\n' "select count(*) from public.admins a join auth.users u on u.id=a.user_id where lower(u.email)=lower(:'email');" \
+              | psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -v email="$ADMIN_EMAIL" -tA -f -)
+            if [ "$exists" = "1" ]; then echo "::notice::Already an admin"; else echo "::error::No user with that email. Sign up first."; exit 1; fi
+          fi
