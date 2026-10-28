@@ -10,8 +10,8 @@ export function LegalPage({ title, children }: { title: string; children: React.
           role="note"
           className="rounded-lg border border-line bg-pale px-4 py-3 text-sm text-fg"
         >
-          <strong>Draft.</strong> This text has not yet been reviewed by a lawyer and may change before
-          public launch. It is not legal advice.
+          <strong>Pre-launch version.</strong> CityCircle is still being built. This text will be
+          reviewed by a lawyer and updated before public launch.
         </p>
       </header>
       {children}
