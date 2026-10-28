@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DomainIcon } from "@/modules/communities/DomainIcon";
 import { communityRepository as repo } from "@/modules/communities/repository";
 
 type Props = { params: Promise<{ city: string }> };
@@ -33,7 +34,7 @@ export default async function CityPage({ params }: Props) {
         / {city.name}
       </nav>
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold">Communities in {city.name}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Communities in {city.name}</h1>
         <p className="text-muted">{city.blurb}</p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-2">
@@ -43,12 +44,17 @@ export default async function CityPage({ params }: Props) {
             <li key={community.id}>
               <Link
                 href={`/cities/${city.slug}/${community.domainSlug}/`}
-                className="block h-full rounded-xl border border-line bg-surface p-4 hover:border-accent"
+                className="flex h-full gap-3 rounded-xl border border-line bg-surface p-4 hover:border-primary"
               >
-                <span className="font-medium">{community.name}</span>
-                <span className="mt-1 block text-sm text-muted">{domain?.description}</span>
-                <span className="mt-3 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent">
-                  {community.status === "live" ? "Live" : "Opening soon"}
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-mint text-primary">
+                  <DomainIcon slug={community.domainSlug} className="h-5 w-5" />
+                </span>
+                <span className="space-y-1">
+                  <span className="block font-medium">{community.name}</span>
+                  <span className="block text-sm leading-relaxed text-muted">{domain?.description}</span>
+                  <span className="mt-1 inline-block rounded-full bg-mint px-2 py-0.5 text-xs font-medium text-primary">
+                    {community.status === "live" ? "Live" : "Opening soon"}
+                  </span>
                 </span>
               </Link>
             </li>
