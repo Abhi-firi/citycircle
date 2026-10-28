@@ -20,7 +20,7 @@ import {
   type StepId,
 } from "./extras";
 
-async function loadExtras(userId: string): Promise<ProfileExtras> {
+export async function loadExtras(userId: string): Promise<ProfileExtras> {
   const db = getSupabase();
   const [profile, details, recruiter] = await Promise.all([
     db.from("profiles").select("about, skills").eq("id", userId).maybeSingle(),
