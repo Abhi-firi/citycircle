@@ -7,79 +7,124 @@ export default function PrivacyPage() {
   return (
     <LegalPage title="Privacy Policy">
       <P>
-        This policy explains what personal information CityCircle collects, why, and the choices you
-        have. We aim to collect only what we need.
+        This policy explains what personal data CityCircle collects, why, who sees it, and the choices
+        you have. It is written to follow India&apos;s Digital Personal Data Protection Act, 2023. We
+        aim to collect only what we need.
       </P>
 
       <H2>1. What we collect</H2>
       <UL>
         <li>
           <strong>Account details:</strong> your email address and password. Your password is handled
-          by our sign-in provider; we never see it in plain text.
+          by our sign-in provider and we never see it in plain text.
         </li>
         <li>
-          <strong>Profile details you give us:</strong> your name, city, the domains you are interested
-          in, and optionally your current role, company and headline.
+          <strong>Profile details you give us:</strong> your name, city, the domains you are
+          interested in, and, as you choose to add them, your headline, role, company and other
+          professional details.
         </li>
         <li>
-          <strong>Activity:</strong> the community waitlists you join.
+          <strong>Activity:</strong> the communities you join, and, once those features launch, your
+          posts, comments, connections and messages.
         </li>
         <li>
-          <strong>Technical data:</strong> basic logs such as IP address and browser type, kept by our
-          service providers for security and to fix errors.
+          <strong>Technical data:</strong> basic logs such as IP address, device and browser type, kept
+          by our providers for security and to fix errors.
         </li>
       </UL>
 
       <H2>2. Why we use it</H2>
       <UL>
         <li>To create and secure your account.</li>
-        <li>To show your profile and run community waitlists.</li>
-        <li>To contact you about your account or when a community you joined opens.</li>
-        <li>To prevent spam, abuse and fraud, and to keep the service working.</li>
+        <li>To show your profile and run community waitlists and communities.</li>
+        <li>To contact you about your account, or when a community you joined opens.</li>
+        <li>To prevent spam, abuse and fraud, and to keep the service working and improve it.</li>
+        <li>To meet legal obligations.</li>
       </UL>
-      <P>We do not sell your personal information, and we do not show advertising at this time.</P>
-
-      <H2>3. Who can see your information</H2>
       <P>
-        Right now your profile is visible only to you. Other members can see only the number of people
-        on each waitlist, never who they are. Before we make profiles visible to others, we will update
-        this policy and give you controls over what is shown.
+        We process your data based on your consent, given when you sign up, and where the law allows
+        for legitimate uses such as security. We do not sell your personal data, and we do not show
+        advertising at this time.
       </P>
 
-      <H2>4. Service providers</H2>
+      <H2>3. Who can see your information</H2>
+      <UL>
+        <li>Right now your profile is visible only to you.</li>
+        <li>Other members see only the number of people on each waitlist, never who they are.</li>
+        <li>
+          Before profiles become visible to others, we will update this policy and give you controls
+          over what is public, visible to members only, or private.
+        </li>
+        <li>
+          Private job preferences, such as expected pay and notice period, will stay visible only to
+          you unless you choose to share them with a recruiter.
+        </li>
+      </UL>
+
+      <H2>4. Service providers and transfers</H2>
       <P>
         We use trusted providers to run the service: Supabase for our database and sign-in (data is
-        stored in the Singapore region), and GitHub to host the website. These providers process data
-        on our behalf and your information may therefore be stored or processed outside India.
+        stored in the Singapore region) and GitHub to host the website. They process data on our
+        behalf under their own security commitments. Your data may therefore be stored or processed
+        outside India. We will tell you if we add a provider that handles your personal data in a
+        significant new way.
       </P>
 
       <H2>5. How long we keep it</H2>
       <P>
-        We keep your information while your account is active. If you ask us to delete your account, we
-        will delete your profile and waitlist memberships, except where we must keep something to meet
-        a legal obligation. Until in-app deletion is available, send your request using the contact
-        details below.
+        We keep your data while your account is active. If you delete your account, we delete your
+        profile and memberships, except where we must keep something to meet a legal obligation or
+        resolve a dispute. Routine backups are removed on their normal cycle.
       </P>
 
       <H2>6. Your rights</H2>
+      <P>You may ask us to:</P>
+      <UL>
+        <li>show you the personal data we hold about you;</li>
+        <li>correct or complete it;</li>
+        <li>delete it, or delete your account;</li>
+        <li>withdraw your consent (this may mean we can no longer provide the service);</li>
+        <li>nominate someone to exercise these rights for you if you die or cannot act.</li>
+      </UL>
       <P>
-        You may ask to access, correct or delete your personal information, withdraw your consent, or
-        raise a complaint. Use the contact details below and we will respond within a reasonable time.
+        Write to the contact below and we will respond within a reasonable time. Until in-app controls
+        are available, we handle these requests by email.
       </P>
 
-      <H2>7. Security</H2>
+      <H2>7. Grievances</H2>
       <P>
-        We use reasonable safeguards, including access rules in our database so members can only reach
-        their own data. No system is completely secure, so we cannot guarantee absolute security.
+        If you have a complaint about how we handle your data, contact us first at the address below and
+        we will try to resolve it promptly. If you are not satisfied, you may complain to the Data
+        Protection Board of India. A named grievance officer will be listed here before public launch.
       </P>
 
-      <H2>8. Age</H2>
-      <P>CityCircle is for people aged 18 and over.</P>
+      <H2>8. Security</H2>
+      <P>
+        We use reasonable safeguards, including access rules in our database so members can reach only
+        their own data, and encrypted connections. No system is completely secure, so we cannot
+        guarantee absolute security. If a breach affects your data, we will tell you and the authorities
+        as the law requires.
+      </P>
 
-      <H2>9. Changes to this policy</H2>
-      <P>We will post any changes on this page and update the date above.</P>
+      <H2>9. Age</H2>
+      <P>
+        CityCircle is for people aged 18 and over. If we learn that someone younger has an account, we
+        will delete it.
+      </P>
 
-      <H2>10. Contact</H2>
+      <H2>10. Cookies and local storage</H2>
+      <P>
+        We use only what is needed to keep you signed in. We do not use advertising or cross-site
+        tracking cookies.
+      </P>
+
+      <H2>11. Changes to this policy</H2>
+      <P>
+        We will post changes on this page and update the date above. For significant changes we will
+        also notify you.
+      </P>
+
+      <H2>12. Contact</H2>
       <Contact />
     </LegalPage>
   );
