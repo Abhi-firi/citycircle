@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
-import { AuthNav } from "@/modules/auth/AuthNav";
+import { AppHeader } from "@/components/AppHeader";
 import { AuthProvider } from "@/modules/auth/AuthProvider";
 import "@fontsource-variable/inter";
 import "./globals.css";
@@ -22,50 +21,42 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body className="min-h-screen antialiased">
         <AuthProvider>
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-fg"
-        >
-          Skip to content
-        </a>
-        <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur">
-          <nav
-            aria-label="Main"
-            className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4"
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-fg"
           >
-            <Link href="/" aria-label="CityCircle home">
-              <Logo />
-            </Link>
-            <div className="flex items-center gap-5">
-              <Link href="/cities/" className="text-sm text-muted hover:text-fg">
-                Cities
+            Skip to content
+          </a>
+          <AppHeader />
+          <main id="main" className="mx-auto max-w-7xl px-4 py-8">
+            {children}
+          </main>
+          <footer className="mx-auto max-w-7xl border-t border-line px-4 py-8 text-sm text-muted">
+            <p>CityCircle is in early development.</p>
+            <nav
+              aria-label="Legal"
+              className="mt-3 flex flex-wrap gap-x-5 gap-y-1"
+            >
+              <Link href="/terms/" className="hover:text-fg">
+                Terms
               </Link>
-              <AuthNav />
-            </div>
-          </nav>
-        </header>
-        <main id="main" className="mx-auto max-w-5xl px-4 py-10">
-          {children}
-        </main>
-        <footer className="mx-auto max-w-5xl border-t border-line px-4 py-8 text-sm text-muted">
-          <p>CityCircle is in early development.</p>
-          <nav aria-label="Legal" className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
-            <Link href="/terms/" className="hover:text-fg">
-              Terms
-            </Link>
-            <Link href="/privacy/" className="hover:text-fg">
-              Privacy
-            </Link>
-            <Link href="/guidelines/" className="hover:text-fg">
-              Community Guidelines
-            </Link>
-          </nav>
-        </footer>
+              <Link href="/privacy/" className="hover:text-fg">
+                Privacy
+              </Link>
+              <Link href="/guidelines/" className="hover:text-fg">
+                Community Guidelines
+              </Link>
+            </nav>
+          </footer>
         </AuthProvider>
       </body>
     </html>

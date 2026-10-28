@@ -9,6 +9,8 @@ export type Comment = {
 };
 export type Post = {
   id: string;
+  citySlug: string;
+  domainSlug: string;
   body: string;
   createdAt: string;
   author: Author;
@@ -31,6 +33,31 @@ function toAuthor(row: AuthorRow): Author {
   };
 }
 
+const POST_COLUMNS =
+  "id, body, created_at, city_slug, domain_slug, author:profiles(id, full_name, headline), comments(count)";
+
+type PostRow = {
+  id: string;
+  body: string;
+  created_at: string;
+  city_slug: string;
+  domain_slug: string;
+  author: AuthorRow;
+  comments: { count: number }[] | null;
+};
+
+function mapPosts(rows: PostRow[]): Post[] {
+  return rows.map((r) => ({
+    id: r.id,
+    citySlug: r.city_slug,
+    domainSlug: r.domain_slug,
+    body: r.body,
+    createdAt: r.created_at,
+    author: toAuthor(r.author),
+    commentCount: r.comments?.[0]?.count ?? 0,
+  }));
+}
+
 /** One page of posts, newest first. Pass the createdAt of the last post to get the next page. */
 export async function fetchPosts(
   citySlug: string,
@@ -39,9 +66,7 @@ export async function fetchPosts(
 ): Promise<Post[]> {
   let query = getSupabase()
     .from("posts")
-    .select(
-      "id, body, created_at, author:profiles(id, full_name, headline), comments(count)",
-    )
+    .select(POST_COLUMNS)
     .eq("city_slug", citySlug)
     .eq("domain_slug", domainSlug)
     .order("created_at", { ascending: false })
@@ -49,20 +74,20 @@ export async function fetchPosts(
   if (before) query = query.lt("created_at", before);
   const { data, error } = await query;
   if (error) throw error;
-  type Row = {
-    id: string;
-    body: string;
-    created_at: string;
-    author: AuthorRow;
-    comments: { count: number }[] | null;
-  };
-  return ((data ?? []) as unknown as Row[]).map((r) => ({
-    id: r.id,
-    body: r.body,
-    createdAt: r.created_at,
-    author: toAuthor(r.author),
-    commentCount: r.comments?.[0]?.count ?? 0,
-  }));
+  return mapPosts((data ?? []) as unknown as PostRow[]);
+}
+
+/** Newest posts across every community the member can read (the database enforces who that is). */
+export async function fetchHomeFeed(before?: string): Promise<Post[]> {
+  let query = getSupabase()
+    .from("posts")
+    .select(POST_COLUMNS)
+    .order("created_at", { ascending: false })
+    .limit(PAGE_SIZE);
+  if (before) query = query.lt("created_at", before);
+  const { data, error } = await query;
+  if (error) throw error;
+  return mapPosts((data ?? []) as unknown as PostRow[]);
 }
 
 export async function createPost(

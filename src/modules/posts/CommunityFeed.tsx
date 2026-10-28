@@ -193,7 +193,7 @@ export function CommunityFeed({
   );
 }
 
-function PostComposer({
+export function PostComposer({
   userId,
   citySlug,
   domainSlug,
@@ -264,13 +264,15 @@ function PostComposer({
   );
 }
 
-function PostCard({
+export function PostCard({
   post,
+  communityName,
   userId,
   isAdmin,
   onDeleted,
 }: {
   post: Post;
+  communityName?: string;
   userId: string;
   isAdmin: boolean;
   onDeleted: () => void;
@@ -306,11 +308,12 @@ function PostCard({
   }
 
   return (
-    <li className="space-y-3 rounded-xl border border-line bg-surface p-4">
+    <li className="space-y-3 rounded-2xl border border-line bg-surface p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <Avatar name={post.author.name} />
         <div className="min-w-0 flex-1">
           <AuthorLine author={post.author} createdAt={post.createdAt} />
+          {communityName && <p className="truncate text-xs text-primary">in {communityName}</p>}
         </div>
         {canDelete && (
           <button
