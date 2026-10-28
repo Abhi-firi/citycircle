@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DomainIcon } from "@/modules/communities/DomainIcon";
 import { communityRepository as repo } from "@/modules/communities/repository";
+import { CommunityFeed } from "@/modules/posts/CommunityFeed";
 import { JoinPanel } from "@/modules/memberships/JoinPanel";
 
 type Props = { params: Promise<{ city: string; domain: string }> };
@@ -60,6 +61,7 @@ export default async function CommunityPage({ params }: Props) {
         cityName={city.name}
         unlockTarget={community.unlockTarget}
       />
+      <CommunityFeed citySlug={city.slug} domainSlug={domain.slug} />
     </div>
   );
 }
