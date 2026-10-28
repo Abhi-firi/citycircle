@@ -1,17 +1,26 @@
 import { SITE } from "@/config/site";
 
-export function LegalPage({ title, children }: { title: string; children: React.ReactNode }) {
+export function LegalPage({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <article className="max-w-2xl space-y-6">
       <header className="space-y-3">
         <h1 className="text-3xl font-semibold">{title}</h1>
-        <p className="text-sm text-muted">Last updated {SITE.legalLastUpdated}</p>
+        <p className="text-sm text-muted">
+          Last updated {SITE.legalLastUpdated}
+        </p>
         <p
           role="note"
           className="rounded-lg border border-line bg-pale px-4 py-3 text-sm text-fg"
         >
-          <strong>Pre-launch version.</strong> CityCircle is still being built. This text will be
-          reviewed by a lawyer and updated before public launch.
+          <strong>Pre-launch version.</strong> CityCircle is still being built.
+          This text will be reviewed by a lawyer and updated before public
+          launch.
         </p>
       </header>
       {children}
@@ -28,14 +37,21 @@ export function P({ children }: { children: React.ReactNode }) {
 }
 
 export function UL({ children }: { children: React.ReactNode }) {
-  return <ul className="list-disc space-y-1 pl-5 leading-relaxed text-fg">{children}</ul>;
+  return (
+    <ul className="list-disc space-y-1 pl-5 leading-relaxed text-fg">
+      {children}
+    </ul>
+  );
 }
 
 export function Contact() {
   return SITE.supportEmail ? (
     <P>
       Contact us at{" "}
-      <a href={`mailto:${SITE.supportEmail}`} className="font-medium text-primary underline">
+      <a
+        href={`mailto:${SITE.supportEmail}`}
+        className="font-medium text-primary underline"
+      >
         {SITE.supportEmail}
       </a>
       .

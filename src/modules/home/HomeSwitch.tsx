@@ -7,5 +7,10 @@ import { MemberHome } from "./MemberHome";
 export function HomeSwitch({ children }: { children: React.ReactNode }) {
   const { user, loading, configError } = useAuth();
   if (loading || configError || !user) return <>{children}</>;
-  return <MemberHome userId={user.id} fallbackName={String(user.user_metadata?.full_name ?? "")} />;
+  return (
+    <MemberHome
+      userId={user.id}
+      fallbackName={String(user.user_metadata?.full_name ?? "")}
+    />
+  );
 }
