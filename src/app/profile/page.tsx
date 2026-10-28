@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase/client";
 import { useAuth } from "@/modules/auth/AuthProvider";
+import { CompleteProfile } from "@/modules/profiles/CompleteProfile";
 import { ProfileForm } from "@/modules/profiles/ProfileForm";
 import { communityRepository as repo } from "@/modules/communities/repository";
 import { fetchMyMemberships } from "@/modules/memberships/api";
@@ -94,7 +95,12 @@ function ProfileLoader({ user }: { user: User }) {
     );
   }
 
-  return <ProfileView profile={profile} communities={communities} onEdit={() => setEditing(true)} />;
+  return (
+    <div className="space-y-6">
+      <ProfileView profile={profile} communities={communities} onEdit={() => setEditing(true)} />
+      <CompleteProfile userId={user.id} />
+    </div>
+  );
 }
 
 export default function ProfilePage() {
