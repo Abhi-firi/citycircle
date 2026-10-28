@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/modules/auth/AuthProvider";
-import { fetchMemberCounts, fetchMyMemberships, joinCommunity, leaveCommunity } from "./api";
+import { fetchStatuses } from "@/modules/admin/api";
+import {
+  fetchMemberCounts,
+  fetchMyMemberships,
+  joinCommunity,
+  leaveCommunity,
+} from "./api";
 import { communityKey, waitlistProgress } from "./progress";
 
 export function JoinPanel({
@@ -27,6 +33,7 @@ export function JoinPanel({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [live, setLive] = useState(false);
 
   const userId = user?.id;
 
@@ -41,6 +48,11 @@ export function JoinPanel({
         ]);
         if (!active) return;
         setCount(counts[key] ?? 0);
+        // Status is a nice-to-have: if it fails the community simply shows as a waitlist.
+        fetchStatuses().then(
+          (s) => active && setLive(s[key] === "live"),
+          () => {},
+        );
         setJoined(mine.includes(key));
       } catch (err) {
         console.error("Could not load community status", err);
@@ -81,7 +93,8 @@ export function JoinPanel({
 
   if (configError) return null;
 
-  const progress = count === null ? null : waitlistProgress(count, unlockTarget);
+  const progress =
+    count === null ? null : waitlistProgress(count, unlockTarget);
 
   return (
     <section
@@ -89,11 +102,13 @@ export function JoinPanel({
       className="max-w-xl space-y-4 rounded-xl border border-line bg-surface p-5"
     >
       <h2 id="waitlist-heading" className="text-lg font-semibold">
-        {progress?.reached ? "Almost open" : "Opening soon"}
+        {live ? "Open" : progress?.reached ? "Almost open" : "Opening soon"}
       </h2>
 
       {loadFailed ? (
-        <p className="text-sm text-muted">Could not load the waitlist right now. Please refresh the page.</p>
+        <p className="text-sm text-muted">
+          Could not load the waitlist right now. Please refresh the page.
+        </p>
       ) : progress === null ? (
         <p className="text-sm text-muted">Loading...</p>
       ) : (
@@ -107,7 +122,10 @@ export function JoinPanel({
               aria-valuenow={progress.percent}
               className="h-2 w-full overflow-hidden rounded-full bg-mint"
             >
-              <div className="h-full rounded-full bg-primary" style={{ width: `${progress.percent}%` }} />
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${progress.percent}%` }}
+              />
             </div>
             <p className="text-sm text-muted">
               {count === 0
@@ -130,17 +148,31 @@ export function JoinPanel({
                     : "rounded-lg bg-primary px-5 py-2.5 font-medium text-on-primary hover:opacity-90 disabled:opacity-60"
                 }
               >
-                {busy ? "Please wait..." : joined ? "Leave waitlist" : "Join waitlist"}
+                {busy
+                  ? "Please wait..."
+                  : joined
+                    ? "Leave waitlist"
+                    : "Join waitlist"}
               </button>
-              {joined && <p className="text-sm text-primary">You are on the waitlist. We will tell you when it opens.</p>}
+              {joined && (
+                <p className="text-sm text-primary">
+                  You are on the waitlist. We will tell you when it opens.
+                </p>
+              )}
             </div>
           ) : (
             <p className="text-sm">
-              <Link href="/signup/" className="font-medium text-primary underline">
+              <Link
+                href="/signup/"
+                className="font-medium text-primary underline"
+              >
                 Create an account
               </Link>{" "}
               or{" "}
-              <Link href="/login/" className="font-medium text-primary underline">
+              <Link
+                href="/login/"
+                className="font-medium text-primary underline"
+              >
                 log in
               </Link>{" "}
               to join the waitlist.
