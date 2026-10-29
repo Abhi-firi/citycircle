@@ -11,12 +11,13 @@ import {
 } from "./extras";
 
 describe("completion", () => {
-  it("starts at 25% (basic details done)", () => {
-    expect(completionPercent(EMPTY_EXTRAS)).toBe(25);
+  it("starts at 20% (basic details done)", () => {
+    expect(completionPercent(EMPTY_EXTRAS)).toBe(20);
   });
   it("reaches 100% when all steps are done", () => {
     const full = {
       ...EMPTY_EXTRAS,
+      hasPhoto: true,
       about: "Hi",
       skills: ["Sales"],
       experienceYears: 3,

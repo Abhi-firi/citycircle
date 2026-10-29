@@ -76,7 +76,11 @@ export function MemberProfileView({
     <div className="mx-auto max-w-2xl space-y-4">
       <Card className="space-y-4 p-6">
         <div className="flex flex-wrap items-start gap-4">
-          <PersonAvatar name={profile.name} size="xl" />
+          <PersonAvatar
+            name={profile.name}
+            path={profile.avatarPath}
+            size="xl"
+          />
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-semibold">{profile.name}</h1>
             {profile.headline && <p>{profile.headline}</p>}

@@ -13,6 +13,7 @@ export type ConversationSummary = {
   otherId: string;
   otherName: string;
   otherHeadline: string;
+  otherAvatar: string | null;
   lastBody: string;
   lastAt: string;
   unread: number;

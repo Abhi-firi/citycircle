@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, ChevronRight } from "lucide-react";
 import { getSupabase } from "@/lib/supabase/client";
+import { AvatarUploader } from "./AvatarUploader";
 import { Field, inputClass } from "@/modules/auth/Field";
 import {
   EMPTY_EXTRAS,
@@ -23,7 +24,11 @@ import {
 export async function loadExtras(userId: string): Promise<ProfileExtras> {
   const db = getSupabase();
   const [profile, details, recruiter] = await Promise.all([
-    db.from("profiles").select("about, skills").eq("id", userId).maybeSingle(),
+    db
+      .from("profiles")
+      .select("about, skills, avatar_path")
+      .eq("id", userId)
+      .maybeSingle(),
     db
       .from("profile_details")
       .select("experience_years")
@@ -42,6 +47,7 @@ export async function loadExtras(userId: string): Promise<ProfileExtras> {
   if (recruiter.error) throw recruiter.error;
   return {
     about: profile.data?.about ?? "",
+    hasPhoto: !!profile.data?.avatar_path,
     skills: profile.data?.skills ?? [],
     experienceYears: details.data?.experience_years ?? null,
     openToWork: recruiter.data?.open_to_work ?? false,
@@ -52,7 +58,17 @@ export async function loadExtras(userId: string): Promise<ProfileExtras> {
   };
 }
 
-export function CompleteProfile({ userId }: { userId: string }) {
+export function CompleteProfile({
+  userId,
+  name,
+  avatarPath,
+  onAvatarChange,
+}: {
+  userId: string;
+  name: string;
+  avatarPath: string | null;
+  onAvatarChange: (path: string | null) => void;
+}) {
   const [extras, setExtras] = useState<ProfileExtras | null>(null);
   const [failed, setFailed] = useState(false);
   const [open, setOpen] = useState<StepId | null>(null);
@@ -74,8 +90,9 @@ export function CompleteProfile({ userId }: { userId: string }) {
   }, [userId]);
 
   if (!extras) return null;
-  const steps = completionSteps(extras);
-  const percent = completionPercent(extras);
+  const withPhoto: ProfileExtras = { ...extras, hasPhoto: avatarPath !== null };
+  const steps = completionSteps(withPhoto);
+  const percent = completionPercent(withPhoto);
 
   function saved(next: ProfileExtras) {
     setExtras(next);
@@ -146,6 +163,14 @@ export function CompleteProfile({ userId }: { userId: string }) {
             </button>
             {open === s.id && (
               <div className="border-t border-line p-4">
+                {s.id === "photo" && (
+                  <AvatarUploader
+                    userId={userId}
+                    name={name}
+                    path={avatarPath}
+                    onChange={onAvatarChange}
+                  />
+                )}
                 {s.id === "about" && (
                   <AboutStep userId={userId} extras={extras} onSaved={saved} />
                 )}

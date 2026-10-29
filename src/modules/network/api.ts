@@ -6,6 +6,7 @@ export type Person = {
   name: string;
   headline: string;
   citySlug: string;
+  avatarPath: string | null;
 };
 
 export type Suggestion = Person & { sharedCommunities: number };
@@ -24,6 +25,7 @@ type ProfileRow = {
   full_name: string;
   headline: string | null;
   city_slug: string | null;
+  avatar_path: string | null;
 };
 
 const toPerson = (r: ProfileRow): Person => ({
@@ -31,6 +33,7 @@ const toPerson = (r: ProfileRow): Person => ({
   name: r.full_name,
   headline: r.headline ?? "",
   citySlug: r.city_slug ?? "",
+  avatarPath: r.avatar_path ?? null,
 });
 
 export async function fetchConnectionRows(): Promise<ConnectionRow[]> {
@@ -60,7 +63,7 @@ export async function fetchPeople(
   if (ids.length === 0) return {};
   const { data, error } = await getSupabase()
     .from("profiles")
-    .select("id, full_name, headline, city_slug")
+    .select("id, full_name, headline, city_slug, avatar_path")
     .in("id", ids);
   if (error) throw error;
   const out: Record<string, Person> = {};
@@ -89,7 +92,7 @@ export async function fetchMemberProfile(
     db
       .from("profiles")
       .select(
-        "id, full_name, headline, city_slug, about, skills, domain_slugs, current_role_title, current_company",
+        "id, full_name, headline, city_slug, avatar_path, about, skills, domain_slugs, current_role_title, current_company",
       )
       .eq("id", id)
       .maybeSingle(),

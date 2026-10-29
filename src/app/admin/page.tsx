@@ -27,8 +27,11 @@ export default function AdminPage() {
     };
   }, [user]);
 
-  if (configError) return <p className="text-muted">Not available right now.</p>;
-  if (loading || !user || isAdmin === null) return <p className="text-muted">Loading...</p>;
-  if (!isAdmin) return <p className="text-muted">You do not have access to this page.</p>;
+  if (configError)
+    return <p className="text-muted">Not available right now.</p>;
+  if (loading || !user || isAdmin === null)
+    return <p className="text-muted">Loading...</p>;
+  if (!isAdmin)
+    return <p className="text-muted">You do not have access to this page.</p>;
   return <AdminPanel adminId={user.id} />;
 }

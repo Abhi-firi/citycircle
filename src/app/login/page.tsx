@@ -41,17 +41,32 @@ export default function LoginPage() {
     }
   }
 
-  if (configError) return <p className="text-muted">Login is not available right now.</p>;
+  if (configError)
+    return <p className="text-muted">Login is not available right now.</p>;
 
   return (
     <div className="max-w-md space-y-6">
       <h1 className="text-3xl font-semibold">Log in</h1>
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <Field label="Email" htmlFor="email">
-          <input id="email" type="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+          <input
+            id="email"
+            type="email"
+            className={inputClass}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
         </Field>
         <Field label="Password" htmlFor="password">
-          <input id="password" type="password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+          <input
+            id="password"
+            type="password"
+            className={inputClass}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+          />
         </Field>
         {error && (
           <p role="alert" className="text-sm text-red-600 dark:text-red-400">

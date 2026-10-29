@@ -1,23 +1,18 @@
 import Link from "next/link";
 import { communityRepository as repo } from "@/modules/communities/repository";
+import { UserAvatar, type AvatarSize } from "@/components/UserAvatar";
 import type { Person } from "./api";
 
 export function PersonAvatar({
   name,
-  size = "md",
+  path,
+  size = "lg",
 }: {
   name: string;
-  size?: "md" | "xl";
+  path?: string | null;
+  size?: AvatarSize;
 }) {
-  const dims = size === "xl" ? "h-20 w-20 text-3xl" : "h-12 w-12 text-lg";
-  return (
-    <span
-      aria-hidden="true"
-      className={`flex shrink-0 items-center justify-center rounded-full bg-mint font-semibold text-deep ${dims}`}
-    >
-      {name.trim().charAt(0).toUpperCase() || "?"}
-    </span>
-  );
+  return <UserAvatar name={name} path={path} size={size} />;
 }
 
 export function memberHref(id: string): string {
@@ -37,7 +32,7 @@ export function PersonRow({
   const city = repo.getCity(person.citySlug);
   return (
     <li className="flex items-center gap-3 py-3">
-      <PersonAvatar name={person.name} />
+      <PersonAvatar name={person.name} path={person.avatarPath} />
       <div className="min-w-0 flex-1">
         <Link
           href={memberHref(person.id)}

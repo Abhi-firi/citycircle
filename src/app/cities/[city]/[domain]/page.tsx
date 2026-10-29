@@ -11,13 +11,12 @@ type Props = { params: Promise<{ city: string; domain: string }> };
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return repo
-    .listCities()
-    .flatMap((city) =>
-      repo
-        .listCommunitiesByCity(city.slug)
-        .map((community) => ({ city: city.slug, domain: community.domainSlug })),
-    );
+  return repo.listCities().flatMap((city) =>
+    repo.listCommunitiesByCity(city.slug).map((community) => ({
+      city: city.slug,
+      domain: community.domainSlug,
+    })),
+  );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -50,7 +49,9 @@ export default async function CommunityPage({ params }: Props) {
           <DomainIcon slug={domain.slug} className="h-7 w-7" />
         </span>
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">{community.name}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            {community.name}
+          </h1>
           <p className="max-w-2xl text-muted">{domain.description}</p>
         </div>
       </div>
