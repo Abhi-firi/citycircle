@@ -96,14 +96,12 @@ export async function createPost(
   domainSlug: string,
   body: string,
 ): Promise<void> {
-  const { error } = await getSupabase()
-    .from("posts")
-    .insert({
-      city_slug: citySlug,
-      domain_slug: domainSlug,
-      author_id: userId,
-      body: body.trim(),
-    });
+  const { error } = await getSupabase().from("posts").insert({
+    city_slug: citySlug,
+    domain_slug: domainSlug,
+    author_id: userId,
+    body: body.trim(),
+  });
   if (error) throw error;
 }
 

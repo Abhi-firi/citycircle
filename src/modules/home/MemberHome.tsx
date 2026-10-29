@@ -8,6 +8,7 @@ import {
   MapPin,
   ShieldCheck,
   User,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { Card } from "@/components/Card";
@@ -30,6 +31,14 @@ import {
 } from "@/modules/posts/api";
 import { PostCard } from "@/modules/posts/CommunityFeed";
 import { MAX_POST, validateBody } from "@/modules/posts/text";
+import {
+  fetchConnectionRows,
+  fetchSuggestions,
+  type Suggestion,
+} from "@/modules/network/api";
+import { ConnectButton } from "@/modules/network/ConnectButton";
+import { relationshipWith, type ConnectionRow } from "@/modules/network/logic";
+import { PersonRow } from "@/modules/network/PersonRow";
 import { loadExtras } from "@/modules/profiles/CompleteProfile";
 import { completionPercent, completionSteps } from "@/modules/profiles/extras";
 
@@ -67,6 +76,9 @@ export function MemberHome({
   const [isAdmin, setIsAdmin] = useState(false);
   const [percent, setPercent] = useState<number | null>(null);
   const [nextStep, setNextStep] = useState<string | null>(null);
+  const [people, setPeople] = useState<Suggestion[]>([]);
+  const [connRows, setConnRows] = useState<ConnectionRow[]>([]);
+  const [peopleReload, setPeopleReload] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -123,6 +135,21 @@ export function MemberHome({
     };
   }, [userId, fallbackName]);
 
+  useEffect(() => {
+    let active = true;
+    Promise.all([fetchSuggestions(5), fetchConnectionRows()]).then(
+      ([sug, rows]) => {
+        if (!active) return;
+        setPeople(sug);
+        setConnRows(rows);
+      },
+      () => {},
+    );
+    return () => {
+      active = false;
+    };
+  }, [userId, peopleReload]);
+
   const joined = useMemo(
     () =>
       memberships.flatMap((key) => {
@@ -177,6 +204,9 @@ export function MemberHome({
               className={`${sideLink} bg-mint text-primary`}
             >
               <Home aria-hidden="true" className="h-4 w-4" /> Home
+            </Link>
+            <Link href="/network/" className={sideLink}>
+              <UserPlus aria-hidden="true" className="h-4 w-4" /> My Network
             </Link>
             <Link href="/cities/" className={sideLink}>
               <Users aria-hidden="true" className="h-4 w-4" /> Communities
@@ -336,6 +366,41 @@ export function MemberHome({
             ))}
           </ul>
         </Card>
+
+        {people.length > 0 && (
+          <Card className="space-y-1 p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold">Recommended people</h2>
+              <Link
+                href="/network/"
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                See all
+              </Link>
+            </div>
+            <ul className="divide-y divide-line">
+              {people.map((p) => (
+                <PersonRow
+                  key={p.id}
+                  person={p}
+                  note={
+                    p.sharedCommunities > 0
+                      ? `${p.sharedCommunities} shared`
+                      : undefined
+                  }
+                  action={
+                    <ConnectButton
+                      me={userId}
+                      other={p.id}
+                      relationship={relationshipWith(connRows, userId, p.id)}
+                      onChange={() => setPeopleReload((n) => n + 1)}
+                    />
+                  }
+                />
+              ))}
+            </ul>
+          </Card>
+        )}
 
         <Card className="space-y-3 p-5">
           <h2 className="font-semibold">Explore cities</h2>
