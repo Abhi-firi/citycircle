@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Home,
+  MessageSquare,
   MapPin,
   ShieldCheck,
   User,
@@ -207,6 +208,9 @@ export function MemberHome({
             </Link>
             <Link href="/network/" className={sideLink}>
               <UserPlus aria-hidden="true" className="h-4 w-4" /> My Network
+            </Link>
+            <Link href="/messages/" className={sideLink}>
+              <MessageSquare aria-hidden="true" className="h-4 w-4" /> Messages
             </Link>
             <Link href="/cities/" className={sideLink}>
               <Users aria-hidden="true" className="h-4 w-4" /> Communities

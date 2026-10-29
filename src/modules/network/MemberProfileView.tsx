@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { communityRepository as repo } from "@/modules/communities/repository";
@@ -11,6 +12,7 @@ import {
 } from "./api";
 import { ReportButton } from "@/modules/moderation/ReportButton";
 import { blockMember, moderationErrorMessage } from "@/modules/moderation/api";
+import { startConversation } from "@/modules/messages/api";
 import { ConnectButton } from "./ConnectButton";
 import { relationshipWith, type ConnectionRow } from "./logic";
 import { PersonAvatar } from "./PersonRow";
@@ -27,6 +29,7 @@ export function MemberProfileView({
   const [state, setState] = useState<
     "loading" | "ready" | "missing" | "failed"
   >("loading");
+  const router = useRouter();
   const [reload, setReload] = useState(0);
   const [blockError, setBlockError] = useState<string | null>(null);
 
@@ -88,12 +91,34 @@ export function MemberProfileView({
               Edit profile
             </Link>
           ) : (
-            <ConnectButton
-              me={userId}
-              other={profile.id}
-              relationship={relationshipWith(rows, userId, profile.id)}
-              onChange={() => setReload((n) => n + 1)}
-            />
+            <span className="flex flex-col items-end gap-2">
+              {relationshipWith(rows, userId, profile.id).state ===
+                "connected" && (
+                <button
+                  type="button"
+                  className="rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-on-primary hover:opacity-90"
+                  onClick={async () => {
+                    try {
+                      const id = await startConversation(profile.id);
+                      router.push(`/messages/?c=${encodeURIComponent(id)}`);
+                    } catch (err) {
+                      console.error("Could not start conversation", err);
+                      setBlockError(
+                        "Could not open the chat. Please try again.",
+                      );
+                    }
+                  }}
+                >
+                  Message
+                </button>
+              )}
+              <ConnectButton
+                me={userId}
+                other={profile.id}
+                relationship={relationshipWith(rows, userId, profile.id)}
+                onChange={() => setReload((n) => n + 1)}
+              />
+            </span>
           )}
         </div>
         {!isMe && (
