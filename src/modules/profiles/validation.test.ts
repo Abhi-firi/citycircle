@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { isProfileComplete, validateProfile, type ProfileInput } from "./validation";
+import {
+  isProfileComplete,
+  validateProfile,
+  type ProfileInput,
+} from "./validation";
 
 const cities = ["delhi", "bangalore"];
 const domains = ["vc", "coders"];
@@ -24,23 +28,43 @@ describe("validateProfile", () => {
   });
 
   it("requires name, city and at least one domain", () => {
-    const errors = validateProfile({ ...valid, fullName: " ", citySlug: "", domainSlugs: [] }, cities, domains);
+    const errors = validateProfile(
+      { ...valid, fullName: " ", citySlug: "", domainSlugs: [] },
+      cities,
+      domains,
+    );
     expect(errors.fullName).toBeDefined();
     expect(errors.citySlug).toBeDefined();
     expect(errors.domainSlugs).toBeDefined();
   });
 
   it("rejects unknown city and domain values", () => {
-    const errors = validateProfile({ ...valid, citySlug: "atlantis", domainSlugs: ["nope"] }, cities, domains);
+    const errors = validateProfile(
+      { ...valid, citySlug: "atlantis", domainSlugs: ["nope"] },
+      cities,
+      domains,
+    );
     expect(errors.citySlug).toBeDefined();
     expect(errors.domainSlugs).toBeDefined();
   });
 
   it("enforces length limits", () => {
-    expect(validateProfile({ ...valid, fullName: "a".repeat(101) }, cities, domains).fullName).toBeDefined();
-    expect(validateProfile({ ...valid, headline: "a".repeat(161) }, cities, domains).headline).toBeDefined();
-    expect(validateProfile({ ...valid, roleTitle: "a".repeat(101) }, cities, domains).roleTitle).toBeDefined();
-    expect(validateProfile({ ...valid, company: "a".repeat(101) }, cities, domains).company).toBeDefined();
+    expect(
+      validateProfile({ ...valid, fullName: "a".repeat(101) }, cities, domains)
+        .fullName,
+    ).toBeDefined();
+    expect(
+      validateProfile({ ...valid, headline: "a".repeat(161) }, cities, domains)
+        .headline,
+    ).toBeDefined();
+    expect(
+      validateProfile({ ...valid, roleTitle: "a".repeat(101) }, cities, domains)
+        .roleTitle,
+    ).toBeDefined();
+    expect(
+      validateProfile({ ...valid, company: "a".repeat(101) }, cities, domains)
+        .company,
+    ).toBeDefined();
   });
 });
 

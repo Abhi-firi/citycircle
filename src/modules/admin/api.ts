@@ -10,11 +10,19 @@ export async function fetchIsAdmin(): Promise<boolean> {
 }
 
 /** Statuses by "city/domain". Communities with no row are still on the waitlist. */
-export async function fetchStatuses(): Promise<Record<string, CommunityStatus>> {
-  const { data, error } = await getSupabase().from("community_status").select("city_slug, domain_slug, status");
+export async function fetchStatuses(): Promise<
+  Record<string, CommunityStatus>
+> {
+  const { data, error } = await getSupabase()
+    .from("community_status")
+    .select("city_slug, domain_slug, status");
   if (error) throw error;
   const out: Record<string, CommunityStatus> = {};
-  for (const r of (data ?? []) as { city_slug: string; domain_slug: string; status: CommunityStatus }[]) {
+  for (const r of (data ?? []) as {
+    city_slug: string;
+    domain_slug: string;
+    status: CommunityStatus;
+  }[]) {
     out[communityKey(r.city_slug, r.domain_slug)] = r.status;
   }
   return out;
@@ -26,8 +34,11 @@ export async function setStatus(
   domainSlug: string,
   status: CommunityStatus,
 ): Promise<void> {
-  const { error } = await getSupabase()
-    .from("community_status")
-    .upsert({ city_slug: citySlug, domain_slug: domainSlug, status, updated_by: adminId });
+  const { error } = await getSupabase().from("community_status").upsert({
+    city_slug: citySlug,
+    domain_slug: domainSlug,
+    status,
+    updated_by: adminId,
+  });
   if (error) throw error;
 }

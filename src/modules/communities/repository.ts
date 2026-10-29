@@ -27,8 +27,11 @@ export function createStaticRepository(): CommunityRepository {
     listCommunitiesByCity: (citySlug) =>
       communities.filter((c) => c.citySlug === citySlug),
     getCommunity: (citySlug, domainSlug) =>
-      communities.find((c) => c.citySlug === citySlug && c.domainSlug === domainSlug),
+      communities.find(
+        (c) => c.citySlug === citySlug && c.domainSlug === domainSlug,
+      ),
   };
 }
 
-export const communityRepository: CommunityRepository = createStaticRepository();
+export const communityRepository: CommunityRepository =
+  createStaticRepository();

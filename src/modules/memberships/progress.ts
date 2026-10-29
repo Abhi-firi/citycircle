@@ -6,7 +6,10 @@ export type WaitlistProgress = {
   reached: boolean;
 };
 
-export function waitlistProgress(count: number, target: number): WaitlistProgress {
+export function waitlistProgress(
+  count: number,
+  target: number,
+): WaitlistProgress {
   const safeCount = Math.max(0, Math.floor(count));
   const safeTarget = Math.max(1, Math.floor(target));
   return {

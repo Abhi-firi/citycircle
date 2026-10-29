@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { MessageSquare, Trash2 } from "lucide-react";
+import { ReportButton } from "@/modules/moderation/ReportButton";
 import { memberHref } from "@/modules/network/PersonRow";
 import { useAuth } from "@/modules/auth/AuthProvider";
 import { fetchIsAdmin, fetchStatuses } from "@/modules/admin/api";
@@ -353,6 +354,14 @@ export function PostCard({
           ? "Comment"
           : `${count} ${count === 1 ? "comment" : "comments"}`}
       </button>
+      {post.author.id !== userId && (
+        <ReportButton
+          me={userId}
+          targetType="post"
+          targetId={post.id}
+          label="Report post"
+        />
+      )}
       {error && (
         <p role="alert" className="text-sm text-red-600">
           {error}
@@ -369,6 +378,15 @@ export function PostCard({
                   <p className="whitespace-pre-wrap break-words text-sm">
                     {c.body}
                   </p>
+                  {c.author.id !== userId && (
+                    <ReportButton
+                      me={userId}
+                      targetType="comment"
+                      targetId={c.id}
+                      label="Report"
+                      className="mt-1"
+                    />
+                  )}
                 </div>
                 {(isAdmin || c.author.id === userId) && (
                   <button

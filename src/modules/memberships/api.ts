@@ -5,9 +5,16 @@ import { communityKey } from "./progress";
 export async function fetchMemberCounts(): Promise<Record<string, number>> {
   const { data, error } = await getSupabase().rpc("community_member_counts");
   if (error) throw error;
-  const rows = (data ?? []) as { city_slug: string; domain_slug: string; member_count: number | string }[];
+  const rows = (data ?? []) as {
+    city_slug: string;
+    domain_slug: string;
+    member_count: number | string;
+  }[];
   const counts: Record<string, number> = {};
-  for (const row of rows) counts[communityKey(row.city_slug, row.domain_slug)] = Number(row.member_count);
+  for (const row of rows)
+    counts[communityKey(row.city_slug, row.domain_slug)] = Number(
+      row.member_count,
+    );
   return counts;
 }
 
@@ -23,7 +30,11 @@ export async function fetchMyMemberships(userId: string): Promise<string[]> {
   );
 }
 
-export async function joinCommunity(userId: string, citySlug: string, domainSlug: string): Promise<void> {
+export async function joinCommunity(
+  userId: string,
+  citySlug: string,
+  domainSlug: string,
+): Promise<void> {
   const { error } = await getSupabase()
     .from("community_memberships")
     .insert({ user_id: userId, city_slug: citySlug, domain_slug: domainSlug });
@@ -31,7 +42,11 @@ export async function joinCommunity(userId: string, citySlug: string, domainSlug
   if (error && error.code !== "23505") throw error;
 }
 
-export async function leaveCommunity(userId: string, citySlug: string, domainSlug: string): Promise<void> {
+export async function leaveCommunity(
+  userId: string,
+  citySlug: string,
+  domainSlug: string,
+): Promise<void> {
   const { error } = await getSupabase()
     .from("community_memberships")
     .delete()

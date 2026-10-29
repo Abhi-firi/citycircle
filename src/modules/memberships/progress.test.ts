@@ -3,7 +3,11 @@ import { communityKey, waitlistProgress } from "./progress";
 
 describe("waitlistProgress", () => {
   it("starts at zero", () => {
-    expect(waitlistProgress(0, 100)).toEqual({ percent: 0, remaining: 100, reached: false });
+    expect(waitlistProgress(0, 100)).toEqual({
+      percent: 0,
+      remaining: 100,
+      reached: false,
+    });
   });
 
   it("rounds the percentage down", () => {
@@ -12,8 +16,16 @@ describe("waitlistProgress", () => {
   });
 
   it("reports reached at and above the target, capped at 100%", () => {
-    expect(waitlistProgress(100, 100)).toEqual({ percent: 100, remaining: 0, reached: true });
-    expect(waitlistProgress(250, 100)).toEqual({ percent: 100, remaining: 0, reached: true });
+    expect(waitlistProgress(100, 100)).toEqual({
+      percent: 100,
+      remaining: 0,
+      reached: true,
+    });
+    expect(waitlistProgress(250, 100)).toEqual({
+      percent: 100,
+      remaining: 0,
+      reached: true,
+    });
   });
 
   it("is safe with bad input", () => {

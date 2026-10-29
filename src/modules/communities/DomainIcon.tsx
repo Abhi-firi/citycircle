@@ -30,7 +30,13 @@ export function hasDomainIcon(slug: string): boolean {
   return slug in ICONS;
 }
 
-export function DomainIcon({ slug, className }: { slug: string; className?: string }) {
+export function DomainIcon({
+  slug,
+  className,
+}: {
+  slug: string;
+  className?: string;
+}) {
   const Icon = ICONS[slug] ?? Users;
   return <Icon aria-hidden="true" strokeWidth={1.75} className={className} />;
 }

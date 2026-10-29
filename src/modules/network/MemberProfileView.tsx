@@ -9,6 +9,8 @@ import {
   fetchMemberProfile,
   type MemberProfile,
 } from "./api";
+import { ReportButton } from "@/modules/moderation/ReportButton";
+import { blockMember, moderationErrorMessage } from "@/modules/moderation/api";
 import { ConnectButton } from "./ConnectButton";
 import { relationshipWith, type ConnectionRow } from "./logic";
 import { PersonAvatar } from "./PersonRow";
@@ -26,6 +28,7 @@ export function MemberProfileView({
     "loading" | "ready" | "missing" | "failed"
   >("loading");
   const [reload, setReload] = useState(0);
+  const [blockError, setBlockError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -93,6 +96,42 @@ export function MemberProfileView({
             />
           )}
         </div>
+        {!isMe && (
+          <div className="flex flex-wrap items-center gap-4 border-t border-line pt-3">
+            <ReportButton
+              me={userId}
+              targetType="member"
+              targetId={profile.id}
+              label="Report member"
+            />
+            <button
+              type="button"
+              className="text-xs text-muted hover:text-fg"
+              onClick={async () => {
+                if (
+                  !window.confirm(
+                    `Block ${profile.name}? You will no longer see each other, and any connection will be removed.`,
+                  )
+                )
+                  return;
+                try {
+                  await blockMember(userId, profile.id);
+                  setReload((n) => n + 1);
+                } catch (err) {
+                  console.error("Block failed", err);
+                  setBlockError(moderationErrorMessage(err));
+                }
+              }}
+            >
+              Block member
+            </button>
+            {blockError && (
+              <span role="alert" className="text-xs text-red-600">
+                {blockError}
+              </span>
+            )}
+          </div>
+        )}
       </Card>
 
       {profile.about && (

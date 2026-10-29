@@ -9,6 +9,11 @@ import {
   type Person,
   type Suggestion,
 } from "./api";
+import {
+  fetchBlockedMembers,
+  unblockMember,
+  type BlockedMember,
+} from "@/modules/moderation/api";
 import { ConnectButton } from "./ConnectButton";
 import {
   groupConnections,
@@ -18,12 +23,13 @@ import {
 } from "./logic";
 import { PersonRow } from "./PersonRow";
 
-type Tab = "invitations" | "connections" | "sent" | "discover";
+type Tab = "invitations" | "connections" | "sent" | "discover" | "blocked";
 
 export function NetworkView({ userId }: { userId: string }) {
   const [rows, setRows] = useState<ConnectionRow[]>([]);
   const [people, setPeople] = useState<Record<string, Person>>({});
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [blocked, setBlocked] = useState<BlockedMember[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [reload, setReload] = useState(0);
@@ -37,14 +43,16 @@ export function NetworkView({ userId }: { userId: string }) {
         const ids = [
           ...new Set(connectionRows.map((r) => otherPartyId(r, userId))),
         ];
-        const [found, suggested] = await Promise.all([
+        const [found, suggested, blockedList] = await Promise.all([
           fetchPeople(ids),
           fetchSuggestions(20).catch(() => []),
+          fetchBlockedMembers().catch(() => []),
         ]);
         if (!active) return;
         setRows(connectionRows);
         setPeople(found);
         setSuggestions(suggested);
+        setBlocked(blockedList);
         setFailed(false);
       } catch (err) {
         console.error("Could not load your network", err);
@@ -164,6 +172,37 @@ export function NetworkView({ userId }: { userId: string }) {
           )}
         {current === "sent" &&
           list(rowsFor(grouped.sent), "No pending requests sent.")}
+        {current === "blocked" &&
+          (blocked.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted">
+              You have not blocked anyone.
+            </p>
+          ) : (
+            <ul className="divide-y divide-line">
+              {blocked.map((b) => (
+                <li
+                  key={b.id}
+                  className="flex items-center justify-between gap-3 py-3"
+                >
+                  <span className="font-medium">{b.name}</span>
+                  <button
+                    type="button"
+                    className="rounded-full border border-line px-4 py-1.5 text-sm font-medium hover:border-primary"
+                    onClick={async () => {
+                      try {
+                        await unblockMember(userId, b.id);
+                        refresh();
+                      } catch (err) {
+                        console.error("Unblock failed", err);
+                      }
+                    }}
+                  >
+                    Unblock
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ))}
         {current === "discover" &&
           (suggestions.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted">

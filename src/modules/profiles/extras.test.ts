@@ -15,19 +15,31 @@ describe("completion", () => {
     expect(completionPercent(EMPTY_EXTRAS)).toBe(25);
   });
   it("reaches 100% when all steps are done", () => {
-    const full = { ...EMPTY_EXTRAS, about: "Hi", skills: ["Sales"], experienceYears: 3, prefsSaved: true };
+    const full = {
+      ...EMPTY_EXTRAS,
+      about: "Hi",
+      skills: ["Sales"],
+      experienceYears: 3,
+      prefsSaved: true,
+    };
     expect(completionSteps(full).every((s) => s.done)).toBe(true);
     expect(completionPercent(full)).toBe(100);
   });
   it("work step needs both skills and experience", () => {
     const partial = { ...EMPTY_EXTRAS, skills: ["Sales"] };
-    expect(completionSteps(partial).find((s) => s.id === "work")?.done).toBe(false);
+    expect(completionSteps(partial).find((s) => s.id === "work")?.done).toBe(
+      false,
+    );
   });
 });
 
 describe("parseSkills", () => {
   it("splits, trims and de-duplicates", () => {
-    expect(parseSkills("Sales, sales,  B2B  Sales\nPython,,")).toEqual(["Sales", "B2B Sales", "Python"]);
+    expect(parseSkills("Sales, sales,  B2B  Sales\nPython,,")).toEqual([
+      "Sales",
+      "B2B Sales",
+      "Python",
+    ]);
   });
 });
 

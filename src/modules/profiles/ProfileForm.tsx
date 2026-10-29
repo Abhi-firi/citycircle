@@ -4,7 +4,11 @@ import { useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";
 import { Field, inputClass } from "@/modules/auth/Field";
 import { communityRepository as repo } from "@/modules/communities/repository";
-import { validateProfile, type ProfileErrors, type ProfileInput } from "./validation";
+import {
+  validateProfile,
+  type ProfileErrors,
+  type ProfileInput,
+} from "./validation";
 
 export function ProfileForm({
   userId,
@@ -69,7 +73,9 @@ export function ProfileForm({
       if (error) {
         console.error("Profile save failed", error);
         // The code (not the message) helps support find the cause without leaking details.
-        setMessage(`Could not save your profile. Please try again. (code: ${error.code || "unknown"})`);
+        setMessage(
+          `Could not save your profile. Please try again. (code: ${error.code || "unknown"})`,
+        );
         return;
       }
       onSaved({
@@ -81,7 +87,9 @@ export function ProfileForm({
       });
     } catch (err) {
       console.error("Profile save failed", err);
-      setMessage("Could not save your profile. Check your connection and try again.");
+      setMessage(
+        "Could not save your profile. Check your connection and try again.",
+      );
     } finally {
       setBusy(false);
     }
@@ -90,10 +98,21 @@ export function ProfileForm({
   return (
     <form onSubmit={onSubmit} className="max-w-xl space-y-5" noValidate>
       <Field label="Full name" htmlFor="fullName" error={errors.fullName}>
-        <input id="fullName" className={inputClass} value={form.fullName} onChange={(e) => set("fullName", e.target.value)} autoComplete="name" />
+        <input
+          id="fullName"
+          className={inputClass}
+          value={form.fullName}
+          onChange={(e) => set("fullName", e.target.value)}
+          autoComplete="name"
+        />
       </Field>
       <Field label="City" htmlFor="city" error={errors.citySlug}>
-        <select id="city" className={inputClass} value={form.citySlug} onChange={(e) => set("citySlug", e.target.value)}>
+        <select
+          id="city"
+          className={inputClass}
+          value={form.citySlug}
+          onChange={(e) => set("citySlug", e.target.value)}
+        >
           <option value="">Choose your city</option>
           {cities.map((c) => (
             <option key={c.slug} value={c.slug}>
@@ -103,11 +122,17 @@ export function ProfileForm({
         </select>
       </Field>
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium">Domains you are interested in</legend>
+        <legend className="text-sm font-medium">
+          Domains you are interested in
+        </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {domains.map((d) => (
             <label key={d.slug} className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={form.domainSlugs.includes(d.slug)} onChange={() => toggleDomain(d.slug)} />
+              <input
+                type="checkbox"
+                checked={form.domainSlugs.includes(d.slug)}
+                onChange={() => toggleDomain(d.slug)}
+              />
               {d.name}
             </label>
           ))}
@@ -118,14 +143,42 @@ export function ProfileForm({
           </p>
         )}
       </fieldset>
-      <Field label="Current role (optional)" htmlFor="role" error={errors.roleTitle}>
-        <input id="role" className={inputClass} value={form.roleTitle} onChange={(e) => set("roleTitle", e.target.value)} />
+      <Field
+        label="Current role (optional)"
+        htmlFor="role"
+        error={errors.roleTitle}
+      >
+        <input
+          id="role"
+          className={inputClass}
+          value={form.roleTitle}
+          onChange={(e) => set("roleTitle", e.target.value)}
+        />
       </Field>
-      <Field label="Company (optional)" htmlFor="company" error={errors.company}>
-        <input id="company" className={inputClass} value={form.company} onChange={(e) => set("company", e.target.value)} />
+      <Field
+        label="Company (optional)"
+        htmlFor="company"
+        error={errors.company}
+      >
+        <input
+          id="company"
+          className={inputClass}
+          value={form.company}
+          onChange={(e) => set("company", e.target.value)}
+        />
       </Field>
-      <Field label="Headline (optional)" htmlFor="headline" error={errors.headline} hint="e.g. Product Manager at a Bangalore startup">
-        <input id="headline" className={inputClass} value={form.headline} onChange={(e) => set("headline", e.target.value)} />
+      <Field
+        label="Headline (optional)"
+        htmlFor="headline"
+        error={errors.headline}
+        hint="e.g. Product Manager at a Bangalore startup"
+      >
+        <input
+          id="headline"
+          className={inputClass}
+          value={form.headline}
+          onChange={(e) => set("headline", e.target.value)}
+        />
       </Field>
 
       {message && (
@@ -142,7 +195,11 @@ export function ProfileForm({
           {busy ? "Saving..." : "Save profile"}
         </button>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="rounded-lg border border-line px-5 py-2.5 font-medium hover:border-primary">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg border border-line px-5 py-2.5 font-medium hover:border-primary"
+          >
             Cancel
           </button>
         )}
