@@ -9,6 +9,7 @@ import {
   LogOut,
   ShieldCheck,
   User,
+  MessageSquare,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { GlobalSearch } from "@/components/GlobalSearch";
 import { fetchIsAdmin } from "@/modules/admin/api";
 import { useAuth } from "@/modules/auth/AuthProvider";
 import { fetchConnectionRows } from "@/modules/network/api";
+import { fetchUnreadMessageCount } from "@/modules/messages/api";
 import { fetchUnreadCount } from "@/modules/notifications/api";
 import { getSupabase } from "@/lib/supabase/client";
 
@@ -133,6 +135,10 @@ export function AppHeader() {
     userId: string;
     count: number;
   } | null>(null);
+  const [unreadMsgs, setUnreadMsgs] = useState<{
+    userId: string;
+    count: number;
+  } | null>(null);
   const [pending, setPending] = useState<{
     userId: string;
     count: number;
@@ -179,8 +185,17 @@ export function AppHeader() {
         (count) => active && setUnread({ userId, count }),
         () => {},
       );
+    const loadMessages = () =>
+      fetchUnreadMessageCount().then(
+        (count) => active && setUnreadMsgs({ userId, count }),
+        () => {},
+      );
     void load();
-    const timer = window.setInterval(load, 60000);
+    void loadMessages();
+    const timer = window.setInterval(() => {
+      void load();
+      void loadMessages();
+    }, 30000);
     return () => {
       active = false;
       window.clearInterval(timer);
@@ -191,6 +206,8 @@ export function AppHeader() {
   const name = String(user?.user_metadata?.full_name ?? user?.email ?? "");
   const isAdmin = adminId !== null && adminId === userId;
   const unreadCount = unread && unread.userId === userId ? unread.count : 0;
+  const unreadMessages =
+    unreadMsgs && unreadMsgs.userId === userId ? unreadMsgs.count : 0;
   const invitations = pending && pending.userId === userId ? pending.count : 0;
   const home = pathname === "/";
   const communities = pathname.startsWith("/cities");
@@ -224,6 +241,17 @@ export function AppHeader() {
                 label="Communities"
                 icon={Users}
                 active={communities}
+              />
+              <NavIcon
+                href="/messages/"
+
+                label="Messages"
+
+                icon={MessageSquare}
+
+                active={pathname.startsWith("/messages")}
+
+                badge={unreadMessages}
               />
               <NavIcon
                 href="/notifications/"
