@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Home, LogOut, ShieldCheck, User, Users } from "lucide-react";
+import { Home, LogOut, ShieldCheck, User, UserPlus, Users } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { fetchIsAdmin } from "@/modules/admin/api";
 import { useAuth } from "@/modules/auth/AuthProvider";
+import { fetchConnectionRows } from "@/modules/network/api";
 import { getSupabase } from "@/lib/supabase/client";
 
 function NavIcon({
@@ -15,11 +16,13 @@ function NavIcon({
   label,
   icon: Icon,
   active,
+  badge = 0,
 }: {
   href: string;
   label: string;
   icon: typeof Home;
   active: boolean;
+  badge?: number;
 }) {
   return (
     <Link
@@ -28,7 +31,14 @@ function NavIcon({
       aria-current={active ? "page" : undefined}
       className={`flex flex-col items-center gap-0.5 px-3 py-1 text-xs ${active ? "text-primary" : "text-muted hover:text-fg"}`}
     >
-      <Icon aria-hidden="true" className="h-5 w-5" />
+      <span className="relative">
+        <Icon aria-hidden="true" className="h-5 w-5" />
+        {badge > 0 && (
+          <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-on-primary">
+            {badge > 9 ? "9+" : badge}
+          </span>
+        )}
+      </span>
       <span className="hidden sm:block">{label}</span>
     </Link>
   );
@@ -110,6 +120,10 @@ export function AppHeader() {
   const pathname = usePathname();
   const userId = user?.id;
   const [adminId, setAdminId] = useState<string | null>(null);
+  const [pending, setPending] = useState<{
+    userId: string;
+    count: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -123,11 +137,34 @@ export function AppHeader() {
     };
   }, [userId]);
 
+  // Pending invitations badge. Refreshed whenever the member moves to another page.
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    fetchConnectionRows().then(
+      (rows) =>
+        active &&
+        setPending({
+          userId,
+          count: rows.filter(
+            (r) => r.status === "pending" && r.addresseeId === userId,
+          ).length,
+        }),
+      () => {},
+    );
+    return () => {
+      active = false;
+    };
+  }, [userId, pathname]);
+
   const member = !loading && !configError && !!user;
   const name = String(user?.user_metadata?.full_name ?? user?.email ?? "");
   const isAdmin = adminId !== null && adminId === userId;
+  const invitations = pending && pending.userId === userId ? pending.count : 0;
   const home = pathname === "/";
   const communities = pathname.startsWith("/cities");
+  const network =
+    pathname.startsWith("/network") || pathname.startsWith("/members");
 
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur">
@@ -144,6 +181,13 @@ export function AppHeader() {
             <GlobalSearch className="order-last w-full md:order-none md:max-w-md md:flex-1" />
             <div className="ml-auto flex items-center gap-1 md:ml-0">
               <NavIcon href="/" label="Home" icon={Home} active={home} />
+              <NavIcon
+                href="/network/"
+                label="My Network"
+                icon={UserPlus}
+                active={network}
+                badge={invitations}
+              />
               <NavIcon
                 href="/cities/"
                 label="Communities"

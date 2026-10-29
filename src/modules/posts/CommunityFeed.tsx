@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { MessageSquare, Trash2 } from "lucide-react";
+import { memberHref } from "@/modules/network/PersonRow";
 import { useAuth } from "@/modules/auth/AuthProvider";
 import { fetchIsAdmin, fetchStatuses } from "@/modules/admin/api";
 import { inputClass } from "@/modules/auth/Field";
@@ -43,7 +45,16 @@ function AuthorLine({
   return (
     <div className="min-w-0">
       <p className="truncate text-sm font-medium">
-        {author.name}
+        {author.id ? (
+          <Link
+            href={memberHref(author.id)}
+            className="hover:text-primary hover:underline"
+          >
+            {author.name}
+          </Link>
+        ) : (
+          author.name
+        )}
         <span className="ml-2 text-xs font-normal text-muted">
           {timeAgo(createdAt)}
         </span>
@@ -313,7 +324,9 @@ export function PostCard({
         <Avatar name={post.author.name} />
         <div className="min-w-0 flex-1">
           <AuthorLine author={post.author} createdAt={post.createdAt} />
-          {communityName && <p className="truncate text-xs text-primary">in {communityName}</p>}
+          {communityName && (
+            <p className="truncate text-xs text-primary">in {communityName}</p>
+          )}
         </div>
         {canDelete && (
           <button
