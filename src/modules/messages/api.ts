@@ -20,12 +20,14 @@ export async function fetchConversations(): Promise<ConversationSummary[]> {
     last_body: string | null;
     last_at: string;
     unread: number;
+    other_avatar: string | null;
   };
   return ((data ?? []) as Row[]).map((r) => ({
     id: r.conversation_id,
     otherId: r.other_id,
     otherName: r.other_name,
     otherHeadline: r.other_headline ?? "",
+    otherAvatar: r.other_avatar ?? null,
     lastBody: r.last_body ?? "",
     lastAt: r.last_at,
     unread: r.unread,
@@ -74,13 +76,11 @@ export async function sendMessage(
   conversationId: string,
   body: string,
 ): Promise<void> {
-  const { error } = await getSupabase()
-    .from("messages")
-    .insert({
-      conversation_id: conversationId,
-      sender_id: me,
-      body: body.trim(),
-    });
+  const { error } = await getSupabase().from("messages").insert({
+    conversation_id: conversationId,
+    sender_id: me,
+    body: body.trim(),
+  });
   if (error) throw error;
 }
 

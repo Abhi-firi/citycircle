@@ -22,8 +22,12 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     if (fullName.trim().length < 1) return setError("Enter your full name.");
-    if (password.length < 8) return setError("Password must be at least 8 characters.");
-    if (!agreed) return setError("Please agree to the Terms and Privacy Policy to continue.");
+    if (password.length < 8)
+      return setError("Password must be at least 8 characters.");
+    if (!agreed)
+      return setError(
+        "Please agree to the Terms and Privacy Policy to continue.",
+      );
 
     setBusy(true);
     try {
@@ -50,14 +54,16 @@ export default function SignupPage() {
     }
   }
 
-  if (configError) return <p className="text-muted">Sign-up is not available right now.</p>;
+  if (configError)
+    return <p className="text-muted">Sign-up is not available right now.</p>;
 
   if (checkEmail) {
     return (
       <div className="max-w-md space-y-3">
         <h1 className="text-3xl font-semibold">Check your email</h1>
         <p className="text-muted">
-          We sent a confirmation link to {email.trim()}. Open it to finish creating your account, then{" "}
+          We sent a confirmation link to {email.trim()}. Open it to finish
+          creating your account, then{" "}
           <Link href="/login/" className="text-accent underline">
             log in
           </Link>
@@ -72,13 +78,37 @@ export default function SignupPage() {
       <h1 className="text-3xl font-semibold">Create your account</h1>
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <Field label="Full name" htmlFor="name">
-          <input id="name" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
+          <input
+            id="name"
+            className={inputClass}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            autoComplete="name"
+          />
         </Field>
         <Field label="Email" htmlFor="email">
-          <input id="email" type="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+          <input
+            id="email"
+            type="email"
+            className={inputClass}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
         </Field>
-        <Field label="Password" htmlFor="password" hint="At least 8 characters.">
-          <input id="password" type="password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+        <Field
+          label="Password"
+          htmlFor="password"
+          hint="At least 8 characters."
+        >
+          <input
+            id="password"
+            type="password"
+            className={inputClass}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+          />
         </Field>
         <label className="flex items-start gap-2 text-sm">
           <input
@@ -89,11 +119,21 @@ export default function SignupPage() {
           />
           <span>
             I am 18 or older and agree to the{" "}
-            <Link href="/terms/" target="_blank" rel="noopener" className="font-medium text-primary underline">
+            <Link
+              href="/terms/"
+              target="_blank"
+              rel="noopener"
+              className="font-medium text-primary underline"
+            >
               Terms of Use
             </Link>{" "}
             and{" "}
-            <Link href="/privacy/" target="_blank" rel="noopener" className="font-medium text-primary underline">
+            <Link
+              href="/privacy/"
+              target="_blank"
+              rel="noopener"
+              className="font-medium text-primary underline"
+            >
               Privacy Policy
             </Link>
             .

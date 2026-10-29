@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { MessageSquare, Trash2 } from "lucide-react";
+import { UserAvatar } from "@/components/UserAvatar";
+import { ImagePicker } from "./ImagePicker";
+import { PostImage } from "./PostImage";
 import { ReportButton } from "@/modules/moderation/ReportButton";
 import { memberHref } from "@/modules/network/PersonRow";
 import { useAuth } from "@/modules/auth/AuthProvider";
@@ -13,7 +16,7 @@ import { communityKey } from "@/modules/memberships/progress";
 import {
   PAGE_SIZE,
   createComment,
-  createPost,
+  createPostWithImage,
   deleteComment,
   deletePost,
   fetchComments,
@@ -25,15 +28,8 @@ import {
 } from "./api";
 import { MAX_COMMENT, MAX_POST, timeAgo, validateBody } from "./text";
 
-function Avatar({ name }: { name: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint text-sm font-semibold text-deep"
-    >
-      {name.trim().charAt(0).toUpperCase() || "?"}
-    </span>
-  );
+function Avatar({ name, path }: { name: string; path?: string | null }) {
+  return <UserAvatar name={name} path={path} size="md" />;
 }
 
 function AuthorLine({
@@ -217,6 +213,7 @@ export function PostComposer({
   onPosted: () => Promise<void>;
 }) {
   const [text, setText] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -227,8 +224,9 @@ export function PostComposer({
     setBusy(true);
     setError(null);
     try {
-      await createPost(userId, citySlug, domainSlug, text);
+      await createPostWithImage(userId, citySlug, domainSlug, text, photo);
       setText("");
+      setPhoto(null);
       await onPosted();
     } catch (err) {
       console.error("Post failed", err);
@@ -255,6 +253,7 @@ export function PostComposer({
         placeholder="Share something with your city's community..."
         className={inputClass}
       />
+      <ImagePicker file={photo} onChange={setPhoto} disabled={busy} />
       {error && (
         <p role="alert" className="text-sm text-red-600">
           {error}
@@ -311,7 +310,7 @@ export function PostCard({
   async function remove() {
     if (!window.confirm("Delete this post?")) return;
     try {
-      await deletePost(post.id);
+      await deletePost(post.id, post.imagePath);
       onDeleted();
     } catch (err) {
       console.error("Delete failed", err);
@@ -322,7 +321,7 @@ export function PostCard({
   return (
     <li className="space-y-3 rounded-2xl border border-line bg-surface p-5 shadow-sm">
       <div className="flex items-start gap-3">
-        <Avatar name={post.author.name} />
+        <Avatar name={post.author.name} path={post.author.avatarPath} />
         <div className="min-w-0 flex-1">
           <AuthorLine author={post.author} createdAt={post.createdAt} />
           {communityName && (
@@ -343,6 +342,7 @@ export function PostCard({
       <p className="whitespace-pre-wrap break-words leading-relaxed">
         {post.body}
       </p>
+      {post.imagePath && <PostImage path={post.imagePath} />}
       <button
         type="button"
         onClick={() => void toggle()}
@@ -372,7 +372,7 @@ export function PostCard({
           <ul className="space-y-3">
             {comments.map((c) => (
               <li key={c.id} className="flex items-start gap-2">
-                <Avatar name={c.author.name} />
+                <Avatar name={c.author.name} path={c.author.avatarPath} />
                 <div className="min-w-0 flex-1 rounded-lg bg-pale px-3 py-2">
                   <AuthorLine author={c.author} createdAt={c.createdAt} />
                   <p className="whitespace-pre-wrap break-words text-sm">

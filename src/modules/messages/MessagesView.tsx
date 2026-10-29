@@ -135,7 +135,7 @@ function ConversationList({
                 aria-current={c.id === activeId ? "true" : undefined}
                 className={`flex items-center gap-3 px-4 py-3 hover:bg-pale ${c.id === activeId ? "bg-mint" : ""}`}
               >
-                <PersonAvatar name={c.otherName} />
+                <PersonAvatar name={c.otherName} path={c.otherAvatar} />
                 <span className="min-w-0 flex-1 text-sm">
                   <span className="flex items-baseline justify-between gap-2">
                     <span
@@ -251,7 +251,10 @@ function Thread({
         >
           <ArrowLeft aria-hidden="true" className="h-5 w-5" />
         </button>
-        <PersonAvatar name={conversation.otherName} />
+        <PersonAvatar
+          name={conversation.otherName}
+          path={conversation.otherAvatar}
+        />
         <div className="min-w-0">
           <Link
             href={memberHref(conversation.otherId)}

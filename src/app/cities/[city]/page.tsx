@@ -34,7 +34,9 @@ export default async function CityPage({ params }: Props) {
         / {city.name}
       </nav>
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Communities in {city.name}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Communities in {city.name}
+        </h1>
         <p className="text-muted">{city.blurb}</p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-2">
@@ -51,7 +53,9 @@ export default async function CityPage({ params }: Props) {
                 </span>
                 <span className="space-y-1">
                   <span className="block font-medium">{community.name}</span>
-                  <span className="block text-sm leading-relaxed text-muted">{domain?.description}</span>
+                  <span className="block text-sm leading-relaxed text-muted">
+                    {domain?.description}
+                  </span>
                   <span className="mt-1 inline-block rounded-full bg-mint px-2 py-0.5 text-xs font-medium text-primary">
                     {community.status === "live" ? "Live" : "Opening soon"}
                   </span>

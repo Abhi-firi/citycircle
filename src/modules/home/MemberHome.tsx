@@ -25,7 +25,7 @@ import {
 import { communityKey } from "@/modules/memberships/progress";
 import {
   PAGE_SIZE,
-  createPost,
+  createPostWithImage,
   fetchHomeFeed,
   writeErrorMessage,
   type Post,
@@ -37,24 +37,31 @@ import {
   fetchSuggestions,
   type Suggestion,
 } from "@/modules/network/api";
+import { UserAvatar } from "@/components/UserAvatar";
+import { ImagePicker } from "@/modules/posts/ImagePicker";
 import { ConnectButton } from "@/modules/network/ConnectButton";
 import { relationshipWith, type ConnectionRow } from "@/modules/network/logic";
 import { PersonRow } from "@/modules/network/PersonRow";
 import { loadExtras } from "@/modules/profiles/CompleteProfile";
 import { completionPercent, completionSteps } from "@/modules/profiles/extras";
 
-type Basics = { name: string; headline: string; citySlug: string };
+type Basics = {
+  name: string;
+  headline: string;
+  citySlug: string;
+  avatarPath: string | null;
+};
 
-function Avatar({ name, size = "md" }: { name: string; size?: "md" | "lg" }) {
-  const dims = size === "lg" ? "h-16 w-16 text-2xl" : "h-10 w-10 text-base";
-  return (
-    <span
-      aria-hidden="true"
-      className={`flex shrink-0 items-center justify-center rounded-full bg-mint font-semibold text-deep ${dims}`}
-    >
-      {name.trim().charAt(0).toUpperCase() || "?"}
-    </span>
-  );
+function Avatar({
+  name,
+  path,
+  size = "md",
+}: {
+  name: string;
+  path?: string | null;
+  size?: "md" | "lg" | "xl";
+}) {
+  return <UserAvatar name={name} path={path} size={size} />;
 }
 
 function communityName(citySlug: string, domainSlug: string): string {
@@ -85,7 +92,7 @@ export function MemberHome({
     let active = true;
     getSupabase()
       .from("profiles")
-      .select("full_name, headline, city_slug")
+      .select("full_name, headline, city_slug, avatar_path")
       .eq("id", userId)
       .maybeSingle()
       .then(
@@ -95,6 +102,7 @@ export function MemberHome({
             name: data?.full_name || fallbackName || "Member",
             headline: data?.headline ?? "",
             citySlug: data?.city_slug ?? "",
+            avatarPath: data?.avatar_path ?? null,
           }),
         () =>
           active &&
@@ -102,6 +110,7 @@ export function MemberHome({
             name: fallbackName || "Member",
             headline: "",
             citySlug: "",
+            avatarPath: null,
           }),
       );
     // Each piece loads on its own so one failure never blanks the page.
@@ -278,6 +287,7 @@ export function MemberHome({
         <HomeComposer
           userId={userId}
           name={basics.name}
+          avatarPath={basics.avatarPath}
           options={postable.map((j) => ({
             key: j.key,
             label: j.community.name,
@@ -296,7 +306,7 @@ export function MemberHome({
       <aside className="space-y-4">
         <Card className="space-y-4 p-5">
           <div className="flex items-center gap-3">
-            <Avatar name={basics.name} size="lg" />
+            <Avatar name={basics.name} path={basics.avatarPath} size="lg" />
             <div className="min-w-0">
               <p className="truncate font-semibold">{basics.name}</p>
               {basics.headline && (
@@ -503,15 +513,18 @@ function Hero({
 function HomeComposer({
   userId,
   name,
+  avatarPath,
   options,
   hasJoined,
 }: {
   userId: string;
   name: string;
+  avatarPath: string | null;
   options: { key: string; label: string }[];
   hasJoined: boolean;
 }) {
   const [text, setText] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
   const [target, setTarget] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -526,8 +539,9 @@ function HomeComposer({
     setBusy(true);
     setError(null);
     try {
-      await createPost(userId, citySlug, domainSlug, text);
+      await createPostWithImage(userId, citySlug, domainSlug, text, photo);
       setText("");
+      setPhoto(null);
       setDone(true);
       window.dispatchEvent(new Event("citycircle:posted"));
     } catch (err) {
@@ -542,7 +556,7 @@ function HomeComposer({
     <Card className="p-4">
       <form onSubmit={submit} className="space-y-3" noValidate>
         <div className="flex items-start gap-3">
-          <Avatar name={name} />
+          <Avatar name={name} path={avatarPath} />
           <div className="flex-1 space-y-3">
             <label htmlFor="home-post" className="sr-only">
               Share something
@@ -565,6 +579,9 @@ function HomeComposer({
               }
               className={`${inputClass} rounded-xl`}
             />
+            {options.length > 0 && text.trim() !== "" && (
+              <ImagePicker file={photo} onChange={setPhoto} disabled={busy} />
+            )}
             {options.length > 0 && text.trim() !== "" && (
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <label className="flex items-center gap-2 text-sm">

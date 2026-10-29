@@ -14,6 +14,8 @@ import {
   Users,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { UserAvatar } from "@/components/UserAvatar";
+import { getSupabase as getDb } from "@/lib/supabase/client";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { fetchIsAdmin } from "@/modules/admin/api";
 import { useAuth } from "@/modules/auth/AuthProvider";
@@ -55,7 +57,15 @@ function NavIcon({
   );
 }
 
-function AccountMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) {
+function AccountMenu({
+  name,
+  avatarPath,
+  isAdmin,
+}: {
+  name: string;
+  avatarPath: string | null;
+  isAdmin: boolean;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -85,9 +95,9 @@ function AccountMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) {
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Account menu"
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-mint text-sm font-semibold text-deep"
+        className="rounded-full"
       >
-        {name.trim().charAt(0).toUpperCase() || "?"}
+        <UserAvatar name={name} path={avatarPath} size="md" />
       </button>
       {open && (
         <div
@@ -131,6 +141,10 @@ export function AppHeader() {
   const pathname = usePathname();
   const userId = user?.id;
   const [adminId, setAdminId] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<{
+    userId: string;
+    path: string | null;
+  } | null>(null);
   const [unread, setUnread] = useState<{
     userId: string;
     count: number;
@@ -155,6 +169,25 @@ export function AppHeader() {
       active = false;
     };
   }, [userId]);
+
+  // Own profile photo for the account button. Refreshed on page changes so a new photo shows up.
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    getDb()
+      .from("profiles")
+      .select("avatar_path")
+      .eq("id", userId)
+      .maybeSingle()
+      .then(
+        ({ data }) =>
+          active && setAvatar({ userId, path: data?.avatar_path ?? null }),
+        () => {},
+      );
+    return () => {
+      active = false;
+    };
+  }, [userId, pathname]);
 
   // Pending invitations badge. Refreshed whenever the member moves to another page.
   useEffect(() => {
@@ -262,7 +295,13 @@ export function AppHeader() {
               />
             </div>
             <div className="md:ml-auto">
-              <AccountMenu name={name} isAdmin={isAdmin} />
+              <AccountMenu
+                name={name}
+                avatarPath={
+                  avatar && avatar.userId === userId ? avatar.path : null
+                }
+                isAdmin={isAdmin}
+              />
             </div>
           </>
         ) : (

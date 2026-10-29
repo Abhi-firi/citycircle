@@ -1,6 +1,11 @@
 "use client";
 
-export default function ErrorPage({ reset }: { error: Error; reset: () => void }) {
+export default function ErrorPage({
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-semibold">Something went wrong</h1>

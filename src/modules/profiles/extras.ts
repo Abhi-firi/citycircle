@@ -7,12 +7,15 @@ export type ProfileExtras = {
   noticePeriodDays: number | null;
   ctcMinLpa: number | null;
   ctcMaxLpa: number | null;
+  /** True when the member has a profile photo. */
+  hasPhoto: boolean;
   /** True once the member has saved the job-preferences step (even with nothing shared). */
   prefsSaved: boolean;
 };
 
 export const EMPTY_EXTRAS: ProfileExtras = {
   about: "",
+  hasPhoto: false,
   skills: [],
   experienceYears: null,
   openToWork: false,
@@ -27,12 +30,13 @@ export const MAX_ABOUT = 2000;
 export const MAX_SKILLS = 30;
 export const MAX_SKILL_LENGTH = 40;
 
-export type StepId = "about" | "work" | "preferences";
+export type StepId = "photo" | "about" | "work" | "preferences";
 
 export type StepStatus = { id: StepId; title: string; done: boolean };
 
 export function completionSteps(extras: ProfileExtras): StepStatus[] {
   return [
+    { id: "photo", title: "Add a profile photo", done: extras.hasPhoto },
     {
       id: "about",
       title: "Write a short intro about you",
@@ -51,10 +55,11 @@ export function completionSteps(extras: ProfileExtras): StepStatus[] {
   ];
 }
 
-/** Share of the 4 steps done. Step 1 (basic details) is always complete once we get here. */
+/** Share of the steps done. Basic details are always complete once we get here, so they count as one. */
 export function completionPercent(extras: ProfileExtras): number {
-  const done = completionSteps(extras).filter((s) => s.done).length;
-  return Math.round(((done + 1) / 4) * 100);
+  const steps = completionSteps(extras);
+  const done = steps.filter((s) => s.done).length;
+  return Math.round(((done + 1) / (steps.length + 1)) * 100);
 }
 
 export function parseSkills(text: string): string[] {

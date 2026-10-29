@@ -1,14 +1,21 @@
 import Link from "next/link";
 import { communityRepository as repo } from "@/modules/communities/repository";
+import { AvatarUploader } from "./AvatarUploader";
 import type { ProfileInput } from "./validation";
 
 export type JoinedCommunity = { key: string; name: string; href: string };
 
 export function ProfileView({
+  userId,
+  avatarPath,
+  onAvatarChange,
   profile,
   communities,
   onEdit,
 }: {
+  userId: string;
+  avatarPath: string | null;
+  onAvatarChange: (path: string | null) => void;
   profile: ProfileInput;
   communities: JoinedCommunity[];
   onEdit: () => void;
@@ -27,13 +34,13 @@ export function ProfileView({
       aria-label="Your profile"
       className="max-w-xl space-y-5 rounded-xl border border-line bg-surface p-6"
     >
+      <AvatarUploader
+        userId={userId}
+        name={profile.fullName}
+        path={avatarPath}
+        onChange={onAvatarChange}
+      />
       <div className="flex items-start gap-4">
-        <div
-          aria-hidden
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-mint text-2xl font-semibold text-deep"
-        >
-          {profile.fullName.trim().charAt(0).toUpperCase()}
-        </div>
         <div className="min-w-0">
           <h2 className="text-2xl font-semibold">{profile.fullName}</h2>
           {profile.headline && <p className="text-fg">{profile.headline}</p>}
