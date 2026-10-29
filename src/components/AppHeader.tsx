@@ -3,12 +3,21 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Home, LogOut, ShieldCheck, User, UserPlus, Users } from "lucide-react";
+import {
+  Bell,
+  Home,
+  LogOut,
+  ShieldCheck,
+  User,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { fetchIsAdmin } from "@/modules/admin/api";
 import { useAuth } from "@/modules/auth/AuthProvider";
 import { fetchConnectionRows } from "@/modules/network/api";
+import { fetchUnreadCount } from "@/modules/notifications/api";
 import { getSupabase } from "@/lib/supabase/client";
 
 function NavIcon({
@@ -120,6 +129,10 @@ export function AppHeader() {
   const pathname = usePathname();
   const userId = user?.id;
   const [adminId, setAdminId] = useState<string | null>(null);
+  const [unread, setUnread] = useState<{
+    userId: string;
+    count: number;
+  } | null>(null);
   const [pending, setPending] = useState<{
     userId: string;
     count: number;
@@ -157,9 +170,27 @@ export function AppHeader() {
     };
   }, [userId, pathname]);
 
+  // Unread notifications badge: refreshed on every page change and once a minute.
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    const load = () =>
+      fetchUnreadCount().then(
+        (count) => active && setUnread({ userId, count }),
+        () => {},
+      );
+    void load();
+    const timer = window.setInterval(load, 60000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [userId, pathname]);
+
   const member = !loading && !configError && !!user;
   const name = String(user?.user_metadata?.full_name ?? user?.email ?? "");
   const isAdmin = adminId !== null && adminId === userId;
+  const unreadCount = unread && unread.userId === userId ? unread.count : 0;
   const invitations = pending && pending.userId === userId ? pending.count : 0;
   const home = pathname === "/";
   const communities = pathname.startsWith("/cities");
@@ -193,6 +224,13 @@ export function AppHeader() {
                 label="Communities"
                 icon={Users}
                 active={communities}
+              />
+              <NavIcon
+                href="/notifications/"
+                label="Notifications"
+                icon={Bell}
+                active={pathname.startsWith("/notifications")}
+                badge={unreadCount}
               />
             </div>
             <div className="md:ml-auto">
