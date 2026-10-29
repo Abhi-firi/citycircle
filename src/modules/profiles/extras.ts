@@ -33,13 +33,21 @@ export type StepStatus = { id: StepId; title: string; done: boolean };
 
 export function completionSteps(extras: ProfileExtras): StepStatus[] {
   return [
-    { id: "about", title: "Write a short intro about you", done: extras.about.trim().length > 0 },
+    {
+      id: "about",
+      title: "Write a short intro about you",
+      done: extras.about.trim().length > 0,
+    },
     {
       id: "work",
       title: "Work experience and skills",
       done: extras.skills.length > 0 && extras.experienceYears !== null,
     },
-    { id: "preferences", title: "Job preferences (private)", done: extras.prefsSaved },
+    {
+      id: "preferences",
+      title: "Job preferences (private)",
+      done: extras.prefsSaved,
+    },
   ];
 }
 
@@ -63,18 +71,31 @@ export function parseSkills(text: string): string[] {
   return out;
 }
 
-export type ExtrasErrors = Partial<Record<"about" | "skills" | "experienceYears" | "ctc", string>>;
+export type ExtrasErrors = Partial<
+  Record<"about" | "skills" | "experienceYears" | "ctc", string>
+>;
 
 export function validateAbout(about: string): ExtrasErrors {
-  return about.length > MAX_ABOUT ? { about: `Keep this under ${MAX_ABOUT} characters.` } : {};
+  return about.length > MAX_ABOUT
+    ? { about: `Keep this under ${MAX_ABOUT} characters.` }
+    : {};
 }
 
-export function validateWork(skills: string[], experienceYears: number | null): ExtrasErrors {
+export function validateWork(
+  skills: string[],
+  experienceYears: number | null,
+): ExtrasErrors {
   const errors: ExtrasErrors = {};
-  if (skills.length > MAX_SKILLS) errors.skills = `Add at most ${MAX_SKILLS} skills.`;
+  if (skills.length > MAX_SKILLS)
+    errors.skills = `Add at most ${MAX_SKILLS} skills.`;
   else if (skills.some((s) => s.length > MAX_SKILL_LENGTH))
     errors.skills = `Each skill must be under ${MAX_SKILL_LENGTH} characters.`;
-  if (experienceYears !== null && (!Number.isInteger(experienceYears) || experienceYears < 0 || experienceYears > 60))
+  if (
+    experienceYears !== null &&
+    (!Number.isInteger(experienceYears) ||
+      experienceYears < 0 ||
+      experienceYears > 60)
+  )
     errors.experienceYears = "Enter whole years between 0 and 60.";
   return errors;
 }
@@ -85,10 +106,16 @@ export function validatePreferences(
   max: number | null,
 ): ExtrasErrors {
   const errors: ExtrasErrors = {};
-  const bad = (n: number | null) => n !== null && (!Number.isFinite(n) || n < 0 || n > 9999);
-  if (bad(min) || bad(max)) errors.ctc = "Enter a pay figure in lakhs per year, between 0 and 9999.";
-  else if (min !== null && max !== null && max < min) errors.ctc = "Maximum must be at least the minimum.";
-  if (noticePeriodDays !== null && !(NOTICE_OPTIONS as readonly number[]).includes(noticePeriodDays))
+  const bad = (n: number | null) =>
+    n !== null && (!Number.isFinite(n) || n < 0 || n > 9999);
+  if (bad(min) || bad(max))
+    errors.ctc = "Enter a pay figure in lakhs per year, between 0 and 9999.";
+  else if (min !== null && max !== null && max < min)
+    errors.ctc = "Maximum must be at least the minimum.";
+  if (
+    noticePeriodDays !== null &&
+    !(NOTICE_OPTIONS as readonly number[]).includes(noticePeriodDays)
+  )
     errors.ctc = errors.ctc ?? "Choose a notice period from the list.";
   return errors;
 }

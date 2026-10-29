@@ -4,7 +4,9 @@ import { DOMAINS } from "./seed";
 
 describe("domain icons", () => {
   it("has an icon for every domain", () => {
-    const missing = DOMAINS.filter((d) => !hasDomainIcon(d.slug)).map((d) => d.slug);
+    const missing = DOMAINS.filter((d) => !hasDomainIcon(d.slug)).map(
+      (d) => d.slug,
+    );
     expect(missing).toEqual([]);
   });
 });

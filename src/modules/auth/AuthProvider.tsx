@@ -12,7 +12,11 @@ type AuthState = {
   configError: boolean;
 };
 
-const AuthContext = createContext<AuthState>({ user: null, loading: true, configError: false });
+const AuthContext = createContext<AuthState>({
+  user: null,
+  loading: true,
+  configError: false,
+});
 
 function tryGetSupabase(): SupabaseClient | null {
   try {
@@ -35,11 +39,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let active = true;
 
     supabase.auth.getSession().then(({ data }) => {
-      if (active) setState({ user: data.session?.user ?? null, loading: false, configError: false });
+      if (active)
+        setState({
+          user: data.session?.user ?? null,
+          loading: false,
+          configError: false,
+        });
     });
 
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active) setState({ user: session?.user ?? null, loading: false, configError: false });
+      if (active)
+        setState({
+          user: session?.user ?? null,
+          loading: false,
+          configError: false,
+        });
     });
 
     return () => {

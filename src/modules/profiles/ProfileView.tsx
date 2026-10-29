@@ -18,10 +18,15 @@ export function ProfileView({
     .map((slug) => repo.getDomain(slug))
     .filter((d): d is NonNullable<typeof d> => d !== undefined);
 
-  const workLine = [profile.roleTitle, profile.company].filter(Boolean).join(" at ");
+  const workLine = [profile.roleTitle, profile.company]
+    .filter(Boolean)
+    .join(" at ");
 
   return (
-    <section aria-label="Your profile" className="max-w-xl space-y-5 rounded-xl border border-line bg-surface p-6">
+    <section
+      aria-label="Your profile"
+      className="max-w-xl space-y-5 rounded-xl border border-line bg-surface p-6"
+    >
       <div className="flex items-start gap-4">
         <div
           aria-hidden
@@ -42,7 +47,10 @@ export function ProfileView({
           <h3 className="text-sm font-medium">Interested in</h3>
           <ul className="flex flex-wrap gap-2">
             {domains.map((d) => (
-              <li key={d.slug} className="rounded-full bg-mint px-3 py-1 text-sm text-primary">
+              <li
+                key={d.slug}
+                className="rounded-full bg-mint px-3 py-1 text-sm text-primary"
+              >
                 {d.name}
               </li>
             ))}
@@ -55,7 +63,10 @@ export function ProfileView({
         {communities.length === 0 ? (
           <p className="text-sm text-muted">
             You have not joined any waitlist yet.{" "}
-            <Link href="/cities/" className="font-medium text-primary underline">
+            <Link
+              href="/cities/"
+              className="font-medium text-primary underline"
+            >
               Find your city
             </Link>
           </p>
@@ -63,7 +74,10 @@ export function ProfileView({
           <ul className="space-y-1">
             {communities.map((c) => (
               <li key={c.key}>
-                <Link href={c.href} className="text-sm font-medium text-primary hover:underline">
+                <Link
+                  href={c.href}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
                   {c.name}
                 </Link>
                 <span className="ml-2 text-xs text-muted">Waitlist</span>

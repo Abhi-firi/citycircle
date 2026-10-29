@@ -24,10 +24,16 @@ export async function loadExtras(userId: string): Promise<ProfileExtras> {
   const db = getSupabase();
   const [profile, details, recruiter] = await Promise.all([
     db.from("profiles").select("about, skills").eq("id", userId).maybeSingle(),
-    db.from("profile_details").select("experience_years").eq("user_id", userId).maybeSingle(),
+    db
+      .from("profile_details")
+      .select("experience_years")
+      .eq("user_id", userId)
+      .maybeSingle(),
     db
       .from("profile_recruiter")
-      .select("open_to_work, notice_period_days, expected_ctc_min_lpa, expected_ctc_max_lpa")
+      .select(
+        "open_to_work, notice_period_days, expected_ctc_min_lpa, expected_ctc_max_lpa",
+      )
       .eq("user_id", userId)
       .maybeSingle(),
   ]);
@@ -77,21 +83,36 @@ export function CompleteProfile({ userId }: { userId: string }) {
   }
 
   return (
-    <section aria-label="Complete your profile" className="max-w-xl space-y-4 rounded-xl border border-line bg-surface p-6">
+    <section
+      aria-label="Complete your profile"
+      className="max-w-xl space-y-4 rounded-xl border border-line bg-surface p-6"
+    >
       <div className="space-y-2">
         <div className="flex items-baseline justify-between">
           <h2 className="text-lg font-semibold">Complete your profile</h2>
           <span className="text-sm font-medium text-primary">{percent}%</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-mint" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100} aria-label="Profile completion">
-          <div className="h-full rounded-full bg-primary" style={{ width: `${percent}%` }} />
+        <div
+          className="h-2 overflow-hidden rounded-full bg-mint"
+          role="progressbar"
+          aria-valuenow={percent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Profile completion"
+        >
+          <div
+            className="h-full rounded-full bg-primary"
+            style={{ width: `${percent}%` }}
+          />
         </div>
         <p className="text-sm text-muted">
-          Everything here is optional. A fuller profile helps people in your city find you.
+          Everything here is optional. A fuller profile helps people in your
+          city find you.
         </p>
         {failed && (
           <p role="alert" className="text-sm text-red-600">
-            Could not load your saved details, so some steps may look empty. Refresh before editing.
+            Could not load your saved details, so some steps may look empty.
+            Refresh before editing.
           </p>
         )}
       </div>
@@ -112,16 +133,32 @@ export function CompleteProfile({ userId }: { userId: string }) {
               {s.done ? (
                 <Check aria-hidden="true" className="h-4 w-4 text-primary" />
               ) : (
-                <span aria-hidden="true" className="h-4 w-4 rounded-full border border-line" />
+                <span
+                  aria-hidden="true"
+                  className="h-4 w-4 rounded-full border border-line"
+                />
               )}
               <span className="flex-1">{s.title}</span>
-              <ChevronRight aria-hidden="true" className={`h-4 w-4 text-muted ${open === s.id ? "rotate-90" : ""}`} />
+              <ChevronRight
+                aria-hidden="true"
+                className={`h-4 w-4 text-muted ${open === s.id ? "rotate-90" : ""}`}
+              />
             </button>
             {open === s.id && (
               <div className="border-t border-line p-4">
-                {s.id === "about" && <AboutStep userId={userId} extras={extras} onSaved={saved} />}
-                {s.id === "work" && <WorkStep userId={userId} extras={extras} onSaved={saved} />}
-                {s.id === "preferences" && <PreferencesStep userId={userId} extras={extras} onSaved={saved} />}
+                {s.id === "about" && (
+                  <AboutStep userId={userId} extras={extras} onSaved={saved} />
+                )}
+                {s.id === "work" && (
+                  <WorkStep userId={userId} extras={extras} onSaved={saved} />
+                )}
+                {s.id === "preferences" && (
+                  <PreferencesStep
+                    userId={userId}
+                    extras={extras}
+                    onSaved={saved}
+                  />
+                )}
               </div>
             )}
           </li>
@@ -131,12 +168,19 @@ export function CompleteProfile({ userId }: { userId: string }) {
   );
 }
 
-type StepProps = { userId: string; extras: ProfileExtras; onSaved: (next: ProfileExtras) => void };
+type StepProps = {
+  userId: string;
+  extras: ProfileExtras;
+  onSaved: (next: ProfileExtras) => void;
+};
 
 function useSaver() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  async function run(task: () => Promise<{ error: { code?: string } | null }[]>, onOk: () => void) {
+  async function run(
+    task: () => Promise<{ error: { code?: string } | null }[]>,
+    onOk: () => void,
+  ) {
     setBusy(true);
     setMessage(null);
     try {
@@ -144,7 +188,9 @@ function useSaver() {
       const failed = results.find((r) => r.error);
       if (failed?.error) {
         console.error("Save failed", failed.error);
-        setMessage(`Could not save. Please try again. (code: ${failed.error.code || "unknown"})`);
+        setMessage(
+          `Could not save. Please try again. (code: ${failed.error.code || "unknown"})`,
+        );
       } else onOk();
     } catch (err) {
       console.error("Save failed", err);
@@ -186,14 +232,24 @@ function AboutStep({ userId, extras, onSaved }: StepProps) {
     setErrors(found);
     if (Object.keys(found).length) return;
     void run(
-      async () => [await getSupabase().from("profiles").update({ about: about.trim() || null }).eq("id", userId)],
+      async () => [
+        await getSupabase()
+          .from("profiles")
+          .update({ about: about.trim() || null })
+          .eq("id", userId),
+      ],
       () => onSaved({ ...extras, about: about.trim() }),
     );
   }
 
   return (
     <form onSubmit={submit} className="space-y-3" noValidate>
-      <Field label="About you" htmlFor="about" error={errors.about} hint={`${about.length}/${MAX_ABOUT}`}>
+      <Field
+        label="About you"
+        htmlFor="about"
+        error={errors.about}
+        hint={`${about.length}/${MAX_ABOUT}`}
+      >
         <textarea
           id="about"
           rows={5}
@@ -210,7 +266,9 @@ function AboutStep({ userId, extras, onSaved }: StepProps) {
 
 function WorkStep({ userId, extras, onSaved }: StepProps) {
   const [skillsText, setSkillsText] = useState(extras.skills.join(", "));
-  const [years, setYears] = useState(extras.experienceYears === null ? "" : String(extras.experienceYears));
+  const [years, setYears] = useState(
+    extras.experienceYears === null ? "" : String(extras.experienceYears),
+  );
   const [errors, setErrors] = useState<ExtrasErrors>({});
   const { busy, message, run } = useSaver();
 
@@ -226,7 +284,9 @@ function WorkStep({ userId, extras, onSaved }: StepProps) {
         const db = getSupabase();
         const a = await db.from("profiles").update({ skills }).eq("id", userId);
         if (a.error) return [a];
-        const b = await db.from("profile_details").upsert({ user_id: userId, experience_years: experienceYears });
+        const b = await db
+          .from("profile_details")
+          .upsert({ user_id: userId, experience_years: experienceYears });
         return [b];
       },
       () => onSaved({ ...extras, skills, experienceYears }),
@@ -235,11 +295,32 @@ function WorkStep({ userId, extras, onSaved }: StepProps) {
 
   return (
     <form onSubmit={submit} className="space-y-3" noValidate>
-      <Field label="Years of experience" htmlFor="years" error={errors.experienceYears}>
-        <input id="years" inputMode="numeric" value={years} onChange={(e) => setYears(e.target.value)} className={inputClass} />
+      <Field
+        label="Years of experience"
+        htmlFor="years"
+        error={errors.experienceYears}
+      >
+        <input
+          id="years"
+          inputMode="numeric"
+          value={years}
+          onChange={(e) => setYears(e.target.value)}
+          className={inputClass}
+        />
       </Field>
-      <Field label="Skills" htmlFor="skills" error={errors.skills} hint="Separate with commas, for example: B2B sales, Python, Fundraising">
-        <textarea id="skills" rows={3} value={skillsText} onChange={(e) => setSkillsText(e.target.value)} className={inputClass} />
+      <Field
+        label="Skills"
+        htmlFor="skills"
+        error={errors.skills}
+        hint="Separate with commas, for example: B2B sales, Python, Fundraising"
+      >
+        <textarea
+          id="skills"
+          rows={3}
+          value={skillsText}
+          onChange={(e) => setSkillsText(e.target.value)}
+          className={inputClass}
+        />
       </Field>
       <SaveRow busy={busy} message={message} />
     </form>
@@ -248,9 +329,15 @@ function WorkStep({ userId, extras, onSaved }: StepProps) {
 
 function PreferencesStep({ userId, extras, onSaved }: StepProps) {
   const [openToWork, setOpenToWork] = useState(extras.openToWork);
-  const [notice, setNotice] = useState(extras.noticePeriodDays === null ? "" : String(extras.noticePeriodDays));
-  const [min, setMin] = useState(extras.ctcMinLpa === null ? "" : String(extras.ctcMinLpa));
-  const [max, setMax] = useState(extras.ctcMaxLpa === null ? "" : String(extras.ctcMaxLpa));
+  const [notice, setNotice] = useState(
+    extras.noticePeriodDays === null ? "" : String(extras.noticePeriodDays),
+  );
+  const [min, setMin] = useState(
+    extras.ctcMinLpa === null ? "" : String(extras.ctcMinLpa),
+  );
+  const [max, setMax] = useState(
+    extras.ctcMaxLpa === null ? "" : String(extras.ctcMaxLpa),
+  );
   const [errors, setErrors] = useState<ExtrasErrors>({});
   const { busy, message, run } = useSaver();
 
@@ -272,21 +359,39 @@ function PreferencesStep({ userId, extras, onSaved }: StepProps) {
           expected_ctc_max_lpa: ctcMaxLpa,
         }),
       ],
-      () => onSaved({ ...extras, openToWork, noticePeriodDays, ctcMinLpa, ctcMaxLpa, prefsSaved: true }),
+      () =>
+        onSaved({
+          ...extras,
+          openToWork,
+          noticePeriodDays,
+          ctcMinLpa,
+          ctcMaxLpa,
+          prefsSaved: true,
+        }),
     );
   }
 
   return (
     <form onSubmit={submit} className="space-y-3" noValidate>
       <p className="rounded-lg bg-pale px-3 py-2 text-sm">
-        Only you can see this. It is not shown on your profile or to other members.
+        Only you can see this. It is not shown on your profile or to other
+        members.
       </p>
       <label className="flex items-center gap-2 text-sm font-medium">
-        <input type="checkbox" checked={openToWork} onChange={(e) => setOpenToWork(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={openToWork}
+          onChange={(e) => setOpenToWork(e.target.checked)}
+        />
         I am open to new job opportunities
       </label>
       <Field label="Notice period" htmlFor="notice">
-        <select id="notice" value={notice} onChange={(e) => setNotice(e.target.value)} className={inputClass}>
+        <select
+          id="notice"
+          value={notice}
+          onChange={(e) => setNotice(e.target.value)}
+          className={inputClass}
+        >
           <option value="">Prefer not to say</option>
           {NOTICE_OPTIONS.map((d) => (
             <option key={d} value={d}>
@@ -296,11 +401,27 @@ function PreferencesStep({ userId, extras, onSaved }: StepProps) {
         </select>
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Expected pay, min (LPA)" htmlFor="ctc-min" error={errors.ctc}>
-          <input id="ctc-min" inputMode="decimal" value={min} onChange={(e) => setMin(e.target.value)} className={inputClass} />
+        <Field
+          label="Expected pay, min (LPA)"
+          htmlFor="ctc-min"
+          error={errors.ctc}
+        >
+          <input
+            id="ctc-min"
+            inputMode="decimal"
+            value={min}
+            onChange={(e) => setMin(e.target.value)}
+            className={inputClass}
+          />
         </Field>
         <Field label="Expected pay, max (LPA)" htmlFor="ctc-max">
-          <input id="ctc-max" inputMode="decimal" value={max} onChange={(e) => setMax(e.target.value)} className={inputClass} />
+          <input
+            id="ctc-max"
+            inputMode="decimal"
+            value={max}
+            onChange={(e) => setMax(e.target.value)}
+            className={inputClass}
+          />
         </Field>
       </div>
       <SaveRow busy={busy} message={message} />

@@ -26,8 +26,12 @@ describe("static community repository", () => {
   });
 
   it("creates one community per city and domain with unique ids", () => {
-    const all = repo.listCities().flatMap((c) => repo.listCommunitiesByCity(c.slug));
-    expect(all).toHaveLength(repo.listCities().length * repo.listDomains().length);
+    const all = repo
+      .listCities()
+      .flatMap((c) => repo.listCommunitiesByCity(c.slug));
+    expect(all).toHaveLength(
+      repo.listCities().length * repo.listDomains().length,
+    );
     expect(new Set(all.map((c) => c.id)).size).toBe(all.length);
   });
 
@@ -37,7 +41,9 @@ describe("static community repository", () => {
   });
 
   it("starts every community on the waitlist with a positive unlock target", () => {
-    const all = repo.listCities().flatMap((c) => repo.listCommunitiesByCity(c.slug));
+    const all = repo
+      .listCities()
+      .flatMap((c) => repo.listCommunitiesByCity(c.slug));
     for (const community of all) {
       expect(community.status).toBe("waitlist");
       expect(community.unlockTarget).toBeGreaterThan(0);
