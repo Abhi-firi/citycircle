@@ -1,3 +1,4 @@
+import { ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -53,6 +54,10 @@ export default async function CommunityPage({ params }: Props) {
             {community.name}
           </h1>
           <p className="max-w-2xl text-muted">{domain.description}</p>
+          <p className="inline-flex items-center gap-1.5 rounded-full bg-mint px-3 py-1 text-xs font-medium text-deep">
+            <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5" />
+            Managed by the CityCircle team
+          </p>
         </div>
       </div>
       <JoinPanel

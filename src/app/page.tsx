@@ -13,8 +13,8 @@ const STEPS = [
   },
   {
     icon: MapPin,
-    title: "Find your city",
-    text: "Every metro city has a community for each domain, run by the CityCircle team.",
+    title: "Pick a city and a domain",
+    text: "For example, Angel Investors in Noida. Every community is created and managed by the CityCircle team.",
   },
   {
     icon: Users,
@@ -62,15 +62,16 @@ export default function HomePage() {
           </svg>
           <div className="relative max-w-2xl space-y-6">
             <p className="text-sm font-medium uppercase tracking-wide text-mint">
-              India&apos;s city-first professional network
+              Hyper-local professional communities
             </p>
             <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              Find the professional communities in your city.
+              Meet the professionals in your city.
             </h1>
             <p className="max-w-xl text-lg text-mint">
-              Investors, founders, coders, recruiters, creators and builders, in{" "}
-              {cities.length} metro cities. Free for members. Every community is
-              run by the CityCircle team, so it stays relevant.
+              Choose your city and your domain, like angel investors, founders
+              or real estate builders, and join that community. Free for
+              members, in {cities.length} metro cities. Every community is run
+              and moderated by the CityCircle team, so it stays relevant.
             </p>
             <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <Link
