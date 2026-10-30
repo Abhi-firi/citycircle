@@ -1,4 +1,4 @@
-/** Temporary wordmark: ring mark plus name in Deep Teal. Replace with the final logo when ready. */
+/** Temporary wordmark: ring mark plus name in Deep Indigo. Replace with the final logo when ready. */
 export function Logo() {
   return (
     <span className="inline-flex items-center gap-2 text-deep">

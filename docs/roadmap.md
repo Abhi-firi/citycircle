@@ -11,7 +11,7 @@ that makes the most sense for launching with waitlists first. Sizes are relative
 | Sign-up, login, basic profile | Done |
 | 8 cities x 10 domains, community pages, waitlist (opens at 100 members) | Done |
 | Draft Terms, Privacy, Community Guidelines, sign-up consent | Done (draft, not lawyer-reviewed) |
-| Brand tokens (teal palette) | Done |
+| Brand tokens (Deep Indigo palette) | Done |
 
 ## Build order
 | # | Work | Size | Why now |
