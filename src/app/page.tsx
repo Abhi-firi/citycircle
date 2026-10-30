@@ -31,7 +31,7 @@ export default function HomePage() {
   return (
     <HomeSwitch>
       <div className="space-y-16">
-        <section className="relative overflow-hidden rounded-2xl bg-deep px-6 py-12 text-white sm:px-12 sm:py-16">
+        <section className="relative overflow-hidden rounded-2xl bg-deep px-5 py-10 text-white sm:px-12 sm:py-16">
           <svg
             aria-hidden="true"
             viewBox="0 0 400 400"
@@ -64,7 +64,7 @@ export default function HomePage() {
             <p className="text-sm font-medium uppercase tracking-wide text-mint">
               India&apos;s city-first professional network
             </p>
-            <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+            <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
               Find the professional communities in your city.
             </h1>
             <p className="max-w-xl text-lg text-mint">
@@ -72,17 +72,17 @@ export default function HomePage() {
               {cities.length} metro cities. Free for members. Every community is
               run by the CityCircle team, so it stays relevant.
             </p>
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <Link
                 href="/signup/"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 font-medium text-deep hover:bg-mint"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 font-medium text-deep hover:bg-mint"
               >
                 Create your profile
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />
               </Link>
               <Link
                 href="/cities/"
-                className="inline-flex items-center rounded-lg border border-white/40 px-5 py-3 font-medium text-white hover:bg-white/10"
+                className="inline-flex items-center justify-center rounded-lg border border-white/40 px-5 py-3 font-medium text-white hover:bg-white/10"
               >
                 Explore cities
               </Link>

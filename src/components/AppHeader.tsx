@@ -30,19 +30,22 @@ function NavIcon({
   icon: Icon,
   active,
   badge = 0,
+  stacked = false,
 }: {
   href: string;
   label: string;
   icon: typeof Home;
   active: boolean;
   badge?: number;
+  /** Bottom tab bar on phones: always show the label, bigger tap area. */
+  stacked?: boolean;
 }) {
   return (
     <Link
       href={href}
       aria-label={label}
       aria-current={active ? "page" : undefined}
-      className={`flex flex-col items-center gap-0.5 px-3 py-1 text-xs ${active ? "text-primary" : "text-muted hover:text-fg"}`}
+      className={`flex flex-col items-center gap-0.5 text-xs ${stacked ? "min-h-14 flex-1 justify-center px-1 text-[11px]" : "px-3 py-1"} ${active ? "text-primary" : "text-muted hover:text-fg"}`}
     >
       <span className="relative">
         <Icon aria-hidden="true" className="h-5 w-5" />
@@ -52,7 +55,7 @@ function NavIcon({
           </span>
         )}
       </span>
-      <span className="hidden sm:block">{label}</span>
+      <span className={stacked ? "" : "hidden sm:block"}>{label}</span>
     </Link>
   );
 }
@@ -86,7 +89,7 @@ function AccountMenu({
   }
 
   const item =
-    "flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-pale";
+    "flex w-full items-center gap-2 px-4 py-3 text-left text-sm hover:bg-pale md:py-2";
   return (
     <div ref={ref} className="relative">
       <button
@@ -95,7 +98,7 @@ function AccountMenu({
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Account menu"
-        className="rounded-full"
+        className="block rounded-full"
       >
         <UserAvatar name={name} path={avatarPath} size="md" />
       </button>
@@ -242,89 +245,119 @@ export function AppHeader() {
   const unreadMessages =
     unreadMsgs && unreadMsgs.userId === userId ? unreadMsgs.count : 0;
   const invitations = pending && pending.userId === userId ? pending.count : 0;
+  useEffect(() => {
+    document.body.classList.toggle("has-tabbar", member);
+    return () => document.body.classList.remove("has-tabbar");
+  }, [member]);
+
   const home = pathname === "/";
   const communities = pathname.startsWith("/cities");
   const network =
     pathname.startsWith("/network") || pathname.startsWith("/members");
 
+  const tabs = (stacked: boolean) => (
+    <>
+      <NavIcon
+        href="/"
+        label="Home"
+        icon={Home}
+        active={home}
+        stacked={stacked}
+      />
+      <NavIcon
+        href="/network/"
+        label="My Network"
+        icon={UserPlus}
+        active={network}
+        badge={invitations}
+        stacked={stacked}
+      />
+      <NavIcon
+        href="/cities/"
+        label="Communities"
+        icon={Users}
+        active={communities}
+        stacked={stacked}
+      />
+      <NavIcon
+        href="/messages/"
+        label="Messages"
+        icon={MessageSquare}
+        active={pathname.startsWith("/messages")}
+        badge={unreadMessages}
+        stacked={stacked}
+      />
+      <NavIcon
+        href="/notifications/"
+        label="Alerts"
+        icon={Bell}
+        active={pathname.startsWith("/notifications")}
+        badge={unreadCount}
+        stacked={stacked}
+      />
+    </>
+  );
+
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur">
-      <nav
-        aria-label="Main"
-        className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3"
-      >
-        <Link href="/" aria-label="CityCircle home">
-          <Logo />
-        </Link>
+    <>
+      <header className="sticky top-0 z-10 border-b border-line bg-surface/95 backdrop-blur">
+        <nav
+          aria-label="Main"
+          className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 md:gap-x-6 md:py-3"
+        >
+          <Link href="/" aria-label="CityCircle home">
+            <Logo />
+          </Link>
 
-        {member ? (
-          <>
-            <GlobalSearch className="order-last w-full md:order-none md:max-w-md md:flex-1" />
-            <div className="ml-auto flex items-center gap-1 md:ml-0">
-              <NavIcon href="/" label="Home" icon={Home} active={home} />
-              <NavIcon
-                href="/network/"
-                label="My Network"
-                icon={UserPlus}
-                active={network}
-                badge={invitations}
-              />
-              <NavIcon
-                href="/cities/"
-                label="Communities"
-                icon={Users}
-                active={communities}
-              />
-              <NavIcon
-                href="/messages/"
-
-                label="Messages"
-
-                icon={MessageSquare}
-
-                active={pathname.startsWith("/messages")}
-
-                badge={unreadMessages}
-              />
-              <NavIcon
-                href="/notifications/"
-                label="Notifications"
-                icon={Bell}
-                active={pathname.startsWith("/notifications")}
-                badge={unreadCount}
-              />
+          {member ? (
+            <>
+              <GlobalSearch className="order-last w-full md:order-none md:max-w-md md:flex-1" />
+              <div className="hidden items-center gap-1 md:flex">
+                {tabs(false)}
+              </div>
+              <div className="ml-auto">
+                <AccountMenu
+                  name={name}
+                  avatarPath={
+                    avatar && avatar.userId === userId ? avatar.path : null
+                  }
+                  isAdmin={isAdmin}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="ml-auto flex items-center gap-3 text-sm sm:gap-5">
+              <Link href="/cities/" className="py-2 text-muted hover:text-fg">
+                Cities
+              </Link>
+              {!loading && !configError && (
+                <>
+                  <Link
+                    href="/login/"
+                    className="py-2 text-muted hover:text-fg"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/signup/"
+                    className="rounded-lg bg-accent px-3.5 py-2 font-medium text-accent-fg hover:opacity-90"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
             </div>
-            <div className="md:ml-auto">
-              <AccountMenu
-                name={name}
-                avatarPath={
-                  avatar && avatar.userId === userId ? avatar.path : null
-                }
-                isAdmin={isAdmin}
-              />
-            </div>
-          </>
-        ) : (
-          <div className="ml-auto flex items-center gap-5 text-sm">
-            <Link href="/cities/" className="text-muted hover:text-fg">
-              Cities
-            </Link>
-            {!loading && !configError && (
-              <>
-                <Link href="/login/" className="text-muted hover:text-fg">
-                  Log in
-                </Link>
-                <Link
-                  href="/signup/"
-                  className="rounded-lg bg-accent px-3 py-1.5 font-medium text-accent-fg hover:opacity-90"
-                >
-                  Sign up
-                </Link>
-              </>
-            )}
-          </div>
-        )}
-      </nav>
-    </header>
+          )}
+        </nav>
+      </header>
+      {member && (
+        <nav
+          aria-label="Tabs"
+          className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
+        >
+          {tabs(true)}
+        </nav>
+      )}
+    </>
   );
 }

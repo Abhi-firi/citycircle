@@ -60,3 +60,22 @@ body {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
+
+/* Mobile: no sideways scroll, no tap flash, and 16px inputs so iOS Safari does not zoom on focus. */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  body.has-tabbar {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
