@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, MapPin, UserPlus, Users } from "lucide-react";
+import { CommunityPicker } from "@/modules/communities/CommunityPicker";
 import { DomainIcon } from "@/modules/communities/DomainIcon";
 import { communityRepository as repo } from "@/modules/communities/repository";
 import { UNLOCK_TARGET } from "@/modules/communities/seed";
@@ -73,21 +74,26 @@ export default function HomePage() {
               members, in {cities.length} metro cities. Every community is run
               and moderated by the CityCircle team, so it stays relevant.
             </p>
-            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+            <div className="max-w-xl pt-2">
+              <CommunityPicker />
+            </div>
+            <p className="text-sm text-mint">
+              New here?{" "}
               <Link
                 href="/signup/"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 font-medium text-deep hover:bg-mint"
+                className="font-medium text-white underline underline-offset-2"
               >
                 Create your profile
-                <ArrowRight aria-hidden="true" className="h-4 w-4" />
-              </Link>
+              </Link>{" "}
+              or{" "}
               <Link
                 href="/cities/"
-                className="inline-flex items-center justify-center rounded-lg border border-white/40 px-5 py-3 font-medium text-white hover:bg-white/10"
+                className="font-medium text-white underline underline-offset-2"
               >
-                Explore cities
+                explore all cities
               </Link>
-            </div>
+              .
+            </p>
           </div>
         </section>
 
