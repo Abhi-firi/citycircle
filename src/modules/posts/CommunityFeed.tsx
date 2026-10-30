@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { MessageSquare, Trash2 } from "lucide-react";
+import { Heart, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ImagePicker } from "./ImagePicker";
 import { PostImage } from "./PostImage";
@@ -21,6 +21,8 @@ import {
   deletePost,
   fetchComments,
   fetchPosts,
+  setLike,
+  updatePost,
   writeErrorMessage,
   type Author,
   type Comment,
@@ -293,6 +295,47 @@ export function PostCard({
   const [count, setCount] = useState(post.commentCount);
   const [error, setError] = useState<string | null>(null);
   const canDelete = isAdmin || post.author.id === userId;
+  const isAuthor = post.author.id === userId;
+  const [body, setBody] = useState(post.body);
+  const [edited, setEdited] = useState(post.editedAt !== null);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(post.body);
+  const [saving, setSaving] = useState(false);
+  const [liked, setLiked] = useState(post.likedByMe);
+  const [likes, setLikes] = useState(post.likeCount);
+
+  async function saveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    const problem = validateBody(draft, MAX_POST);
+    if (problem) return setError(problem);
+    setSaving(true);
+    setError(null);
+    try {
+      await updatePost(post.id, draft);
+      setBody(draft.trim());
+      setEdited(true);
+      setEditing(false);
+    } catch (err) {
+      console.error("Edit failed", err);
+      setError(writeErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function toggleLike() {
+    const next = !liked;
+    setLiked(next);
+    setLikes((n) => Math.max(0, n + (next ? 1 : -1)));
+    try {
+      await setLike(userId, post.id, next);
+    } catch (err) {
+      console.error("Like failed", err);
+      setLiked(!next);
+      setLikes((n) => Math.max(0, n + (next ? -1 : 1)));
+      setError(writeErrorMessage(err));
+    }
+  }
 
   async function toggle() {
     const next = !open;
@@ -328,6 +371,19 @@ export function PostCard({
             <p className="truncate text-xs text-primary">in {communityName}</p>
           )}
         </div>
+        {isAuthor && !editing && (
+          <button
+            type="button"
+            onClick={() => {
+              setDraft(body);
+              setEditing(true);
+            }}
+            aria-label="Edit post"
+            className="text-muted hover:text-fg"
+          >
+            <Pencil aria-hidden="true" className="h-4 w-4" />
+          </button>
+        )}
         {canDelete && (
           <button
             type="button"
@@ -339,21 +395,73 @@ export function PostCard({
           </button>
         )}
       </div>
-      <p className="whitespace-pre-wrap break-words leading-relaxed">
-        {post.body}
-      </p>
+      {editing ? (
+        <form onSubmit={saveEdit} className="space-y-2" noValidate>
+          <label htmlFor={`e-${post.id}`} className="sr-only">
+            Edit your post
+          </label>
+          <textarea
+            id={`e-${post.id}`}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={4}
+            maxLength={MAX_POST}
+            className={inputClass}
+          />
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-accent-fg hover:opacity-90 disabled:opacity-60"
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(false);
+                setError(null);
+              }}
+              className="rounded-lg border border-line px-4 py-1.5 text-sm font-medium hover:border-primary"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : (
+        <p className="whitespace-pre-wrap break-words leading-relaxed">
+          {body}
+          {edited && <span className="ml-2 text-xs text-muted">(edited)</span>}
+        </p>
+      )}
       {post.imagePath && <PostImage path={post.imagePath} />}
-      <button
-        type="button"
-        onClick={() => void toggle()}
-        aria-expanded={open}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-      >
-        <MessageSquare aria-hidden="true" className="h-4 w-4" />
-        {count === 0
-          ? "Comment"
-          : `${count} ${count === 1 ? "comment" : "comments"}`}
-      </button>
+      <div className="flex items-center gap-5">
+        <button
+          type="button"
+          onClick={() => void toggleLike()}
+          aria-pressed={liked}
+          aria-label={liked ? "Unlike" : "Like"}
+          className={`inline-flex min-h-9 items-center gap-1.5 text-sm font-medium hover:underline ${liked ? "text-primary" : "text-muted"}`}
+        >
+          <Heart
+            aria-hidden="true"
+            className="h-4 w-4"
+            fill={liked ? "currentColor" : "none"}
+          />
+          {likes === 0 ? "Like" : `${likes} ${likes === 1 ? "like" : "likes"}`}
+        </button>
+        <button
+          type="button"
+          onClick={() => void toggle()}
+          aria-expanded={open}
+          className="inline-flex min-h-9 items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+        >
+          <MessageSquare aria-hidden="true" className="h-4 w-4" />
+          {count === 0
+            ? "Comment"
+            : `${count} ${count === 1 ? "comment" : "comments"}`}
+        </button>
+      </div>
       {post.author.id !== userId && (
         <ReportButton
           me={userId}
