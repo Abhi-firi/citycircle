@@ -75,6 +75,16 @@ body {
   textarea {
     font-size: 16px;
   }
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  label:has(> input[type="checkbox"]) {
+    min-height: 2.75rem;
+    align-items: center;
+  }
   body.has-tabbar {
     padding-bottom: calc(4rem + env(safe-area-inset-bottom));
   }
