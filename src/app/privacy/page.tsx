@@ -62,13 +62,19 @@ export default function PrivacyPage() {
       <UL>
         <li>
           Your name, headline, city, role, company, about text, skills, years of
-          experience and the domains you are interested in are visible to other
-          logged-in CityCircle members. They are not visible to people who are
-          not signed in.
+          experience, the domains you are interested in and, only if you choose
+          to add it, your gender are visible to other logged-in CityCircle
+          members. They are not visible to people who are not signed in.
+        </li>
+        <li>
+          Your profile photo is stored with a random, hard-to-guess link. Anyone
+          who has that link can open the photo, so only upload a photo you are
+          comfortable sharing.
         </li>
         <li>
           Your posts and comments are visible to the members of the community
-          they were posted in.
+          they were posted in. Photos attached to posts are private to those
+          members and are shown through short-lived links.
         </li>
         <li>
           Your connections and connection requests are visible only to you and

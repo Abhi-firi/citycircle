@@ -14,6 +14,7 @@ import { ReportButton } from "@/modules/moderation/ReportButton";
 import { blockMember, moderationErrorMessage } from "@/modules/moderation/api";
 import { startConversation } from "@/modules/messages/api";
 import { ConnectButton } from "./ConnectButton";
+import { genderLabel } from "@/modules/profiles/validation";
 import { relationshipWith, type ConnectionRow } from "./logic";
 import { PersonAvatar } from "./PersonRow";
 
@@ -85,7 +86,13 @@ export function MemberProfileView({
             <h1 className="text-2xl font-semibold">{profile.name}</h1>
             {profile.headline && <p>{profile.headline}</p>}
             {work && <p className="text-sm text-muted">{work}</p>}
-            {city && <p className="text-sm text-muted">{city.name}</p>}
+            {(city || profile.gender) && (
+              <p className="text-sm text-muted">
+                {[genderLabel(profile.gender), city?.name]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
           </div>
           {isMe ? (
             <Link

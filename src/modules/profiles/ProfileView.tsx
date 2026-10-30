@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { communityRepository as repo } from "@/modules/communities/repository";
 import { AvatarUploader } from "./AvatarUploader";
-import type { ProfileInput } from "./validation";
+import { genderLabel, type ProfileInput } from "./validation";
 
 export type JoinedCommunity = { key: string; name: string; href: string };
 
@@ -45,7 +45,13 @@ export function ProfileView({
           <h2 className="text-2xl font-semibold">{profile.fullName}</h2>
           {profile.headline && <p className="text-fg">{profile.headline}</p>}
           {workLine && <p className="text-sm text-muted">{workLine}</p>}
-          {city && <p className="text-sm text-muted">{city.name}</p>}
+          {(city || profile.gender) && (
+            <p className="text-sm text-muted">
+              {[genderLabel(profile.gender), city?.name]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          )}
         </div>
       </div>
 

@@ -5,8 +5,20 @@
 // Job details (experience, skills, notice period, CTC) are deliberately NOT
 // here. They belong to a separate "complete your profile" step added later.
 
+export const GENDER_OPTIONS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other", label: "Other" },
+] as const;
+
+export function genderLabel(value: string): string {
+  return GENDER_OPTIONS.find((g) => g.value === value)?.label ?? "";
+}
+
 export type ProfileInput = {
   fullName: string;
+  /** "male", "female", "other", or empty when not shared. */
+  gender: string;
   headline: string;
   citySlug: string;
   domainSlugs: string[];
@@ -27,6 +39,12 @@ export function validateProfile(
   if (name.length < 1) errors.fullName = "Enter your full name.";
   else if (name.length > 100)
     errors.fullName = "Name must be 100 characters or fewer.";
+
+  if (
+    input.gender !== "" &&
+    !GENDER_OPTIONS.some((g) => g.value === input.gender)
+  )
+    errors.gender = "Choose from the list.";
 
   if (input.headline.trim().length > 160)
     errors.headline = "Headline must be 160 characters or fewer.";

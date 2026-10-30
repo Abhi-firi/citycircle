@@ -13,6 +13,7 @@ const valid: ProfileInput = {
   headline: "Product Manager",
   citySlug: "bangalore",
   domainSlugs: ["coders"],
+  gender: "",
   roleTitle: "PM",
   company: "Acme",
 };
@@ -76,5 +77,14 @@ describe("isProfileComplete", () => {
   it("is false when city or domains are missing", () => {
     expect(isProfileComplete({ ...valid, citySlug: "" })).toBe(false);
     expect(isProfileComplete({ ...valid, domainSlugs: [] })).toBe(false);
+  });
+
+  it("accepts a known gender and rejects others", () => {
+    expect(
+      validateProfile({ ...valid, gender: "female" }, cities, domains),
+    ).toEqual({});
+    expect(
+      validateProfile({ ...valid, gender: "x" }, cities, domains).gender,
+    ).toBeDefined();
   });
 });
