@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin, Search } from "lucide-react";
 import { communityRepository as repo } from "@/modules/communities/repository";
+import { useAuth } from "@/modules/auth/AuthProvider";
+import { searchPeople, type Person } from "@/modules/network/api";
+import { toNamePattern } from "@/modules/network/logic";
+import { PersonAvatar, memberHref } from "@/modules/network/PersonRow";
 
 type Result = {
   key: string;
@@ -47,6 +51,35 @@ export function GlobalSearch({ className = "" }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const results = useMemo(() => searchCommunities(query), [query]);
+  const { user } = useAuth();
+  const [people, setPeople] = useState<{ q: string; list: Person[] }>({
+    q: "",
+    list: [],
+  });
+  const pattern = user ? toNamePattern(query) : null;
+
+  useEffect(() => {
+    if (!pattern) return;
+    let stale = false;
+    const t = setTimeout(() => {
+      searchPeople(pattern)
+        .then((list) => {
+          if (!stale) setPeople({ q: pattern, list });
+        })
+        .catch(() => {
+          if (!stale) setPeople({ q: pattern, list: [] });
+        });
+    }, 250);
+    return () => {
+      stale = true;
+      clearTimeout(t);
+    };
+  }, [pattern]);
+
+  const peopleShown =
+    pattern && people.q === pattern
+      ? people.list.filter((p) => p.id !== user?.id)
+      : [];
 
   function go(href: string) {
     setOpen(false);
@@ -71,7 +104,7 @@ export function GlobalSearch({ className = "" }: { className?: string }) {
         }}
       >
         <label htmlFor="global-search" className="sr-only">
-          Search cities and communities
+          Search people, cities and communities
         </label>
         <span className="flex items-center gap-2 rounded-full bg-bg px-4 py-2 ring-1 ring-line focus-within:ring-primary">
           <Search aria-hidden="true" className="h-4 w-4 text-muted" />
@@ -83,7 +116,11 @@ export function GlobalSearch({ className = "" }: { className?: string }) {
               setOpen(true);
             }}
             onFocus={() => setOpen(true)}
-            placeholder="Search cities and communities..."
+            placeholder={
+              user
+                ? "Search people, cities, communities..."
+                : "Search cities and communities..."
+            }
             autoComplete="off"
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
           />
@@ -91,27 +128,53 @@ export function GlobalSearch({ className = "" }: { className?: string }) {
       </form>
       {open && query.trim().length >= 2 && (
         <ul className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-line bg-surface py-1 shadow-lg">
-          {results.length === 0 ? (
+          {results.length === 0 && peopleShown.length === 0 ? (
             <li className="px-4 py-3 text-sm text-muted">No matches.</li>
           ) : (
-            results.map((r) => (
-              <li key={r.key}>
-                <Link
-                  href={r.href}
-                  onClick={() => go(r.href)}
-                  className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-pale"
-                >
-                  {r.kind === "city" && (
-                    <MapPin
-                      aria-hidden="true"
-                      className="h-4 w-4 text-primary"
-                    />
-                  )}
-                  <span className="flex-1 truncate font-medium">{r.label}</span>
-                  <span className="text-xs text-muted">{r.sub}</span>
-                </Link>
-              </li>
-            ))
+            <>
+              {peopleShown.map((p) => (
+                <li key={`p-${p.id}`}>
+                  <Link
+                    href={memberHref(p.id)}
+                    onClick={() => go(memberHref(p.id))}
+                    className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-pale"
+                  >
+                    <PersonAvatar name={p.name} path={p.avatarPath} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium">
+                        {p.name}
+                      </span>
+                      {p.headline && (
+                        <span className="block truncate text-xs text-muted">
+                          {p.headline}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs text-muted">Person</span>
+                  </Link>
+                </li>
+              ))}
+              {results.map((r) => (
+                <li key={r.key}>
+                  <Link
+                    href={r.href}
+                    onClick={() => go(r.href)}
+                    className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-pale"
+                  >
+                    {r.kind === "city" && (
+                      <MapPin
+                        aria-hidden="true"
+                        className="h-4 w-4 text-primary"
+                      />
+                    )}
+                    <span className="flex-1 truncate font-medium">
+                      {r.label}
+                    </span>
+                    <span className="text-xs text-muted">{r.sub}</span>
+                  </Link>
+                </li>
+              ))}
+            </>
           )}
         </ul>
       )}

@@ -49,3 +49,11 @@ export function groupConnections(rows: ConnectionRow[], me: string): Grouped {
     connected: rows.filter((r) => r.status === "accepted"),
   };
 }
+
+/** Cleans a typed name for a PostgREST ilike filter: trims and escapes LIKE wildcards. */
+export function toNamePattern(query: string): string | null {
+  const q = query.trim().replace(/\s+/g, " ");
+  if (q.length < 2) return null;
+  const escaped = q.replace(/[\\%_]/g, (c) => `\\${c}`);
+  return `%${escaped}%`;
+}
