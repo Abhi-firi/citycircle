@@ -243,7 +243,7 @@ export function MemberHome({
           <h2 className="text-sm font-semibold">Your communities</h2>
           {joined.length === 0 ? (
             <p className="text-sm text-muted">
-              None yet. Join one from the right.
+              None yet. Join one from the list.
             </p>
           ) : (
             <ul className="space-y-1">
