@@ -3,6 +3,7 @@ import {
   groupConnections,
   otherPartyId,
   relationshipWith,
+  toNamePattern,
   type ConnectionRow,
 } from "./logic";
 
@@ -43,5 +44,17 @@ describe("otherPartyId", () => {
   it("returns the other side", () => {
     expect(otherPartyId(rows[0]!, "me")).toBe("a");
     expect(otherPartyId(rows[1]!, "me")).toBe("b");
+  });
+});
+
+describe("toNamePattern", () => {
+  it("ignores short input", () => {
+    expect(toNamePattern(" a ")).toBeNull();
+  });
+  it("wraps and trims", () => {
+    expect(toNamePattern("  Asha   Rao ")).toBe("%Asha Rao%");
+  });
+  it("escapes LIKE wildcards", () => {
+    expect(toNamePattern("a%b_c")).toBe("%a\\%b\\_c%");
   });
 });

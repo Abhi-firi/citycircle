@@ -158,3 +158,17 @@ export function networkErrorMessage(err: unknown): string {
     return "You have sent too many requests today. Please try again tomorrow.";
   return `Something went wrong. Please try again.${code ? ` (code: ${code})` : ""}`;
 }
+
+export async function searchPeople(
+  pattern: string,
+  limit = 5,
+): Promise<Person[]> {
+  const { data, error } = await getSupabase()
+    .from("profiles")
+    .select("id, full_name, headline, city_slug, avatar_path")
+    .ilike("full_name", pattern)
+    .order("full_name")
+    .limit(limit);
+  if (error) throw error;
+  return ((data ?? []) as ProfileRow[]).map(toPerson);
+}
