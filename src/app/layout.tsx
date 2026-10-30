@@ -7,15 +7,15 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "CityCircle: find your city's professional communities",
+    default: "CityCircle: hyper-local professional communities",
     template: "%s | CityCircle",
   },
   description:
-    "Curated city-wise communities for investors, founders, coders, recruiters, creators and builders across India's metro cities.",
+    "Hyper-local professional communities for investors, founders, coders, recruiters, creators and builders in India's metro cities. Every community is run by the CityCircle team.",
   openGraph: {
-    title: "CityCircle: find your city's professional communities",
+    title: "CityCircle: hyper-local professional communities",
     description:
-      "Curated city-wise communities for investors, founders, coders, recruiters, creators and builders across India's metro cities.",
+      "Hyper-local professional communities for investors, founders, coders, recruiters, creators and builders in India's metro cities. Every community is run by the CityCircle team.",
     siteName: "CityCircle",
     type: "website",
   },

@@ -25,8 +25,9 @@ export default function TermsPage() {
 
       <H2>1. What CityCircle is</H2>
       <P>
-        CityCircle is a city-first professional network. It offers communities
-        for each city and domain, member profiles, and over time posts,
+        CityCircle is a platform of hyper-local professional communities. It
+        offers communities for each city and domain, each created and moderated
+        by the CityCircle team, member profiles, and over time posts,
         connections, messaging and other features. Some features are still being
         built and may change.
       </P>
