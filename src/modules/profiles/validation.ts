@@ -15,9 +15,17 @@ export function genderLabel(value: string): string {
   return GENDER_OPTIONS.find((g) => g.value === value)?.label ?? "";
 }
 
+/** What other members see instead of the gender itself, like LinkedIn. */
+export function pronounsFor(value: string): string {
+  if (value === "male") return "He/Him";
+  if (value === "female") return "She/Her";
+  if (value === "other") return "They/Them";
+  return "";
+}
+
 export type ProfileInput = {
   fullName: string;
-  /** "male", "female", "other", or empty when not shared. */
+  /** "male", "female" or "other". Required. */
   gender: string;
   headline: string;
   citySlug: string;
@@ -40,10 +48,8 @@ export function validateProfile(
   else if (name.length > 100)
     errors.fullName = "Name must be 100 characters or fewer.";
 
-  if (
-    input.gender !== "" &&
-    !GENDER_OPTIONS.some((g) => g.value === input.gender)
-  )
+  if (!input.gender) errors.gender = "Choose your gender.";
+  else if (!GENDER_OPTIONS.some((g) => g.value === input.gender))
     errors.gender = "Choose from the list.";
 
   if (input.headline.trim().length > 160)
@@ -68,10 +74,11 @@ export function validateProfile(
   return errors;
 }
 
-/** A profile counts as set up once it has a name, a city and at least one domain. */
+/** A profile counts as set up once it has a name, gender, a city and at least one domain. */
 export function isProfileComplete(input: ProfileInput): boolean {
   return (
     input.fullName.trim() !== "" &&
+    input.gender !== "" &&
     input.citySlug !== "" &&
     input.domainSlugs.length > 0
   );

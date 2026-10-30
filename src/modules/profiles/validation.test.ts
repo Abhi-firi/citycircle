@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isProfileComplete,
+  pronounsFor,
   validateProfile,
   type ProfileInput,
 } from "./validation";
@@ -13,7 +14,7 @@ const valid: ProfileInput = {
   headline: "Product Manager",
   citySlug: "bangalore",
   domainSlugs: ["coders"],
-  gender: "",
+  gender: "female",
   roleTitle: "PM",
   company: "Acme",
 };
@@ -77,6 +78,20 @@ describe("isProfileComplete", () => {
   it("is false when city or domains are missing", () => {
     expect(isProfileComplete({ ...valid, citySlug: "" })).toBe(false);
     expect(isProfileComplete({ ...valid, domainSlugs: [] })).toBe(false);
+    expect(isProfileComplete({ ...valid, gender: "" })).toBe(false);
+  });
+
+  it("requires gender", () => {
+    expect(
+      validateProfile({ ...valid, gender: "" }, cities, domains).gender,
+    ).toBeDefined();
+  });
+
+  it("maps gender to pronouns", () => {
+    expect(pronounsFor("male")).toBe("He/Him");
+    expect(pronounsFor("female")).toBe("She/Her");
+    expect(pronounsFor("other")).toBe("They/Them");
+    expect(pronounsFor("")).toBe("");
   });
 
   it("accepts a known gender and rejects others", () => {

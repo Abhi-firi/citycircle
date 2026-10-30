@@ -123,14 +123,14 @@ export function ProfileForm({
           ))}
         </select>
       </Field>
-      <Field label="Gender (optional)" htmlFor="gender" error={errors.gender}>
+      <Field label="Gender" htmlFor="gender" error={errors.gender}>
         <select
           id="gender"
           value={form.gender}
           onChange={(e) => set("gender", e.target.value)}
           className={inputClass}
         >
-          <option value="">Prefer not to say</option>
+          <option value="">Select</option>
           {GENDER_OPTIONS.map((g) => (
             <option key={g.value} value={g.value}>
               {g.label}

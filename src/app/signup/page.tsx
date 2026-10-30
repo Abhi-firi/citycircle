@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase/client";
 import { useAuth } from "@/modules/auth/AuthProvider";
 import { Field, inputClass } from "@/modules/auth/Field";
+import { GENDER_OPTIONS } from "@/modules/profiles/validation";
 
 export default function SignupPage() {
   const router = useRouter();
   const { configError } = useAuth();
   const [fullName, setFullName] = useState("");
+  const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +24,8 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     if (fullName.trim().length < 1) return setError("Enter your full name.");
+    if (!GENDER_OPTIONS.some((g) => g.value === gender))
+      return setError("Choose your gender.");
     if (password.length < 8)
       return setError("Password must be at least 8 characters.");
     if (!agreed)
@@ -36,7 +40,7 @@ export default function SignupPage() {
         email: email.trim(),
         password,
         options: {
-          data: { full_name: fullName.trim() },
+          data: { full_name: fullName.trim(), gender },
           emailRedirectTo: `${window.location.origin}${base}/login/`,
         },
       });
@@ -85,6 +89,25 @@ export default function SignupPage() {
             onChange={(e) => setFullName(e.target.value)}
             autoComplete="name"
           />
+        </Field>
+        <Field
+          label="Gender"
+          htmlFor="gender"
+          hint="Other members see only your pronouns (He/Him, She/Her, They/Them)."
+        >
+          <select
+            id="gender"
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">Select</option>
+            {GENDER_OPTIONS.map((g) => (
+              <option key={g.value} value={g.value}>
+                {g.label}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field label="Email" htmlFor="email">
           <input
