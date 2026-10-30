@@ -22,6 +22,9 @@ export type Post = {
   createdAt: string;
   author: Author;
   commentCount: number;
+  likeCount: number;
+  likedByMe: boolean;
+  editedAt: string | null;
 };
 
 export const PAGE_SIZE = 20;
@@ -43,7 +46,7 @@ function toAuthor(row: AuthorRow): Author {
 }
 
 const POST_COLUMNS =
-  "id, body, created_at, city_slug, domain_slug, image_path, author:profiles(id, full_name, headline, avatar_path), comments(count)";
+  "id, body, created_at, city_slug, domain_slug, image_path, edited_at, author:profiles(id, full_name, headline, avatar_path), comments(count), likes:post_likes(count)";
 
 type PostRow = {
   id: string;
@@ -52,11 +55,13 @@ type PostRow = {
   city_slug: string;
   domain_slug: string;
   image_path: string | null;
+  edited_at: string | null;
   author: AuthorRow;
   comments: { count: number }[] | null;
+  likes: { count: number }[] | null;
 };
 
-function mapPosts(rows: PostRow[]): Post[] {
+function mapPosts(rows: PostRow[], liked: Set<string>): Post[] {
   return rows.map((r) => ({
     id: r.id,
     citySlug: r.city_slug,
@@ -66,7 +71,30 @@ function mapPosts(rows: PostRow[]): Post[] {
     createdAt: r.created_at,
     author: toAuthor(r.author),
     commentCount: r.comments?.[0]?.count ?? 0,
+    likeCount: r.likes?.[0]?.count ?? 0,
+    likedByMe: liked.has(r.id),
+    editedAt: r.edited_at ?? null,
   }));
+}
+
+/** Which of these posts the signed-in member has liked. */
+async function likedAmong(postIds: string[]): Promise<Set<string>> {
+  if (postIds.length === 0) return new Set();
+  const db = getSupabase();
+  const { data: session } = await db.auth.getSession();
+  const me = session.session?.user.id;
+  if (!me) return new Set();
+  const { data, error } = await db
+    .from("post_likes")
+    .select("post_id")
+    .eq("user_id", me)
+    .in("post_id", postIds);
+  if (error) throw error;
+  return new Set((data ?? []).map((r) => r.post_id as string));
+}
+
+async function withLikes(rows: PostRow[]): Promise<Post[]> {
+  return mapPosts(rows, await likedAmong(rows.map((r) => r.id)));
 }
 
 /** One page of posts, newest first. Pass the createdAt of the last post to get the next page. */
@@ -85,7 +113,7 @@ export async function fetchPosts(
   if (before) query = query.lt("created_at", before);
   const { data, error } = await query;
   if (error) throw error;
-  return mapPosts((data ?? []) as unknown as PostRow[]);
+  return withLikes((data ?? []) as unknown as PostRow[]);
 }
 
 /** Newest posts across every community the member can read (the database enforces who that is). */
@@ -98,7 +126,7 @@ export async function fetchHomeFeed(before?: string): Promise<Post[]> {
   if (before) query = query.lt("created_at", before);
   const { data, error } = await query;
   if (error) throw error;
-  return mapPosts((data ?? []) as unknown as PostRow[]);
+  return withLikes((data ?? []) as unknown as PostRow[]);
 }
 
 export async function createPost(
@@ -116,6 +144,31 @@ export async function createPost(
     image_path: imagePath,
   });
   if (error) throw error;
+}
+
+export async function updatePost(postId: string, body: string): Promise<void> {
+  const { error } = await getSupabase()
+    .from("posts")
+    .update({ body: body.trim() })
+    .eq("id", postId);
+  if (error) throw error;
+}
+
+export async function setLike(
+  userId: string,
+  postId: string,
+  liked: boolean,
+): Promise<void> {
+  const db = getSupabase();
+  const { error } = liked
+    ? await db.from("post_likes").insert({ post_id: postId, user_id: userId })
+    : await db
+        .from("post_likes")
+        .delete()
+        .eq("post_id", postId)
+        .eq("user_id", userId);
+  // 23505 = already liked (double tap): the end state is what the person wanted.
+  if (error && error.code !== "23505") throw error;
 }
 
 export async function deletePost(
