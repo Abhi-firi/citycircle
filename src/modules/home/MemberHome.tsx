@@ -729,7 +729,7 @@ function HomeFeed({
           <p className="text-sm text-muted">
             {hasJoined
               ? "Posts from your communities show up here as soon as they go live."
-              : "Join a community on the right. Its posts will show up here once it opens."}
+              : "Join a community from the list. Its posts will show up here once it opens."}
           </p>
         </Card>
       ) : (

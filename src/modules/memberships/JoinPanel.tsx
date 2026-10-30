@@ -144,8 +144,8 @@ export function JoinPanel({
                 disabled={busy}
                 className={
                   joined
-                    ? "rounded-lg border border-line px-5 py-2.5 font-medium hover:border-primary disabled:opacity-60"
-                    : "rounded-lg bg-primary px-5 py-2.5 font-medium text-on-primary hover:opacity-90 disabled:opacity-60"
+                    ? "w-full rounded-lg border border-line px-5 py-3 sm:w-auto font-medium hover:border-primary disabled:opacity-60"
+                    : "w-full rounded-lg bg-primary px-5 py-3 sm:w-auto font-medium text-on-primary hover:opacity-90 disabled:opacity-60"
                 }
               >
                 {busy

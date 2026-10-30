@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { AuthProvider } from "@/modules/auth/AuthProvider";
@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#176b63",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -37,7 +44,7 @@ export default function RootLayout({
             Skip to content
           </a>
           <AppHeader />
-          <main id="main" className="mx-auto max-w-7xl px-4 py-8">
+          <main id="main" className="mx-auto max-w-7xl px-4 py-5 sm:py-8">
             {children}
           </main>
           <footer className="mx-auto max-w-7xl border-t border-line px-4 py-8 text-sm text-muted">

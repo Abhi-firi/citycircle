@@ -60,3 +60,32 @@ body {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
+
+/* Mobile: no sideways scroll, no tap flash, and 16px inputs so iOS Safari does not zoom on focus. */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  label:has(> input[type="checkbox"]) {
+    min-height: 2.75rem;
+    align-items: center;
+  }
+  body.has-tabbar {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}

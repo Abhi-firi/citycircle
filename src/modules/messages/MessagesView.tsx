@@ -241,7 +241,7 @@ function Thread({
   }, [text, userId, conversation.id, onSent]);
 
   return (
-    <Card className="flex h-[70vh] min-h-96 flex-col overflow-hidden">
+    <Card className="flex h-[calc(100dvh-16rem)] min-h-80 md:h-[70vh] md:min-h-96 flex-col overflow-hidden">
       <header className="flex items-center gap-3 border-b border-line px-4 py-3">
         <button
           type="button"
