@@ -32,7 +32,7 @@ function ProfileLoader({ user }: { user: User }) {
         const { data, error } = await getSupabase()
           .from("profiles")
           .select(
-            "full_name, headline, city_slug, domain_slugs, current_role_title, current_company, avatar_path",
+            "full_name, gender, headline, city_slug, domain_slugs, current_role_title, current_company, avatar_path",
           )
           .eq("id", user.id)
           .maybeSingle();
@@ -45,6 +45,7 @@ function ProfileLoader({ user }: { user: User }) {
             : "";
         const loaded: ProfileInput = {
           fullName: data?.full_name ?? metaName,
+          gender: data?.gender ?? "",
           headline: data?.headline ?? "",
           citySlug: data?.city_slug ?? "",
           domainSlugs: data?.domain_slugs ?? [],

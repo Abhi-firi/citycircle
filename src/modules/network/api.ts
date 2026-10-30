@@ -14,6 +14,7 @@ export type Suggestion = Person & { sharedCommunities: number };
 export type MemberProfile = Person & {
   roleTitle: string;
   company: string;
+  gender: string;
   about: string;
   skills: string[];
   domainSlugs: string[];
@@ -92,7 +93,7 @@ export async function fetchMemberProfile(
     db
       .from("profiles")
       .select(
-        "id, full_name, headline, city_slug, avatar_path, about, skills, domain_slugs, current_role_title, current_company",
+        "id, full_name, gender, headline, city_slug, avatar_path, about, skills, domain_slugs, current_role_title, current_company",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -110,6 +111,7 @@ export async function fetchMemberProfile(
         domain_slugs: string[] | null;
         current_role_title: string | null;
         current_company: string | null;
+        gender: string | null;
       })
     | null;
   if (!r) return null;
@@ -117,6 +119,7 @@ export async function fetchMemberProfile(
     ...toPerson(r),
     roleTitle: r.current_role_title ?? "",
     company: r.current_company ?? "",
+    gender: r.gender ?? "",
     about: r.about ?? "",
     skills: r.skills ?? [],
     domainSlugs: r.domain_slugs ?? [],

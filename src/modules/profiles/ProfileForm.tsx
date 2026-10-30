@@ -5,6 +5,7 @@ import { getSupabase } from "@/lib/supabase/client";
 import { Field, inputClass } from "@/modules/auth/Field";
 import { communityRepository as repo } from "@/modules/communities/repository";
 import {
+  GENDER_OPTIONS,
   validateProfile,
   type ProfileErrors,
   type ProfileInput,
@@ -65,6 +66,7 @@ export function ProfileForm({
           id: userId,
           full_name: form.fullName.trim(),
           headline: form.headline.trim() || null,
+          gender: form.gender || null,
           city_slug: form.citySlug,
           domain_slugs: form.domainSlugs,
           current_role_title: form.roleTitle.trim() || null,
@@ -117,6 +119,21 @@ export function ProfileForm({
           {cities.map((c) => (
             <option key={c.slug} value={c.slug}>
               {c.name}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Gender (optional)" htmlFor="gender" error={errors.gender}>
+        <select
+          id="gender"
+          value={form.gender}
+          onChange={(e) => set("gender", e.target.value)}
+          className={inputClass}
+        >
+          <option value="">Prefer not to say</option>
+          {GENDER_OPTIONS.map((g) => (
+            <option key={g.value} value={g.value}>
+              {g.label}
             </option>
           ))}
         </select>
