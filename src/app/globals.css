@@ -9,18 +9,19 @@
 :root {
   color-scheme: light;
 
-  /* Primary brand */
-  --brand-primary: #176b63; /* buttons, active nav, links, key actions */
-  --brand-deep: #164e49; /* logo, premium sections */
-  --brand-mint: #e5f1ee; /* subtle highlights, selected items */
-  --brand-pale: #f0f7f5; /* lightly tinted cards, secondary sections */
+  /* Primary brand (Deep Indigo) */
+  --brand-primary: #3730a3; /* buttons, active nav, links, key actions */
+  --brand-deep: #2a2480; /* logo, hero and premium sections */
+  --brand-secondary: #6366f1; /* secondary highlights, charts, illustrations */
+  --brand-mint: #e0e7ff; /* subtle highlights, selected items (accent) */
+  --brand-pale: #eef0ff; /* lightly tinted cards, secondary sections */
 
   /* Neutrals */
-  --neutral-bg: #f7f9f8; /* main background */
+  --neutral-bg: #f3f4ff; /* main background */
   --neutral-surface: #ffffff; /* cards */
-  --neutral-text: #263331; /* primary text */
-  --neutral-muted: #687773; /* secondary text */
-  --neutral-line: #e3eae7; /* borders and dividers */
+  --neutral-text: #111827; /* primary text */
+  --neutral-muted: #596075; /* secondary text */
+  --neutral-line: #e0e3f3; /* borders and dividers */
 
   --on-primary: #ffffff;
 }
@@ -28,6 +29,7 @@
 @theme inline {
   --color-primary: var(--brand-primary);
   --color-deep: var(--brand-deep);
+  --color-secondary: var(--brand-secondary);
   --color-mint: var(--brand-mint);
   --color-pale: var(--brand-pale);
 
