@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { startConversation } from "@/modules/messages/api";
 import {
   acceptRequest,
   networkErrorMessage,
@@ -26,6 +28,7 @@ export function ConnectButton({
   relationship: Relationship;
   onChange: () => void;
 }) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,17 +102,32 @@ export function ConnectButton({
       break;
     case "connected":
       buttons = (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            if (window.confirm("Remove this connection?"))
-              void run(() => removeConnection(relationship.connectionId));
-          }}
-          className={outline}
-        >
-          Connected · Remove
-        </button>
+        <span className="flex items-center gap-3">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() =>
+              void run(async () => {
+                const id = await startConversation(other);
+                router.push(`/messages/?c=${encodeURIComponent(id)}`);
+              })
+            }
+            className={primary}
+          >
+            Message
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              if (window.confirm("Remove this connection?"))
+                void run(() => removeConnection(relationship.connectionId));
+            }}
+            className="text-xs text-muted hover:text-fg disabled:opacity-60"
+          >
+            Remove
+          </button>
+        </span>
       );
       break;
   }
